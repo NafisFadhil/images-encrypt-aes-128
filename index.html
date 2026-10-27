@@ -110,7 +110,7 @@
                 <div class="card h-100">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-sliders text-primary me-1"></i> Form Input</span>
-                        <span class="badge bg-primary-subtle text-primary font-monospace" style="font-size: 0.68rem;">AES-256-CBC</span>
+                        <span id="nistBadge" class="badge bg-success-subtle text-success font-monospace" style="font-size: 0.65rem;" title="Lolos Validasi NIST FIPS-197 & SP 800-38A"><i class="bi bi-check2-circle me-1"></i>FIPS-197 / SP 800-38A</span>
                     </div>
                     <div class="card-body d-flex flex-column justify-content-between">
                         <div>
@@ -236,7 +236,7 @@
                         <ol class="text-secondary mb-0 ps-3" style="font-size: 0.74rem; line-height: 1.35;">
                             <li class="mb-1"><strong class="text-dark">Key Expansion:</strong> 15 Round Keys (240 byte) dari kunci 256-bit via S-Box & Rcon.</li>
                             <li class="mb-1"><strong class="text-dark">Ekstraksi RGB:</strong> Membagi byte RGB ke dalam blok 16 byte.</li>
-                            <li class="mb-1"><strong class="text-dark">Chaining (CBC):</strong> $C_0 = E_K(P_0 \oplus IV)$, blok $i$ di-XOR $C_{i-1}$.</li>
+                            <li class="mb-1"><strong class="text-dark">Chaining (CBC):</strong> C₀ = E_K(P₀ ⊕ IV), blok i di-XOR Cᵢ₋₁.</li>
                             <li class="mb-1"><strong class="text-dark">14 Putaran AES:</strong> SubBytes, ShiftRows, MixColumns (1–13), AddRoundKey. Round 14 tanpa MixColumns.</li>
                             <li><strong class="text-dark">Rekonstruksi:</strong> Memetakan byte hasil ke canvas RGB, Alpha = 255.</li>
                         </ol>
@@ -349,13 +349,23 @@
                                     <span id="metricCorrBadge" class="badge bg-secondary-subtle text-secondary font-monospace py-0 px-1" style="font-size: 0.65rem;">Ideal: ~0</span>
                                 </div>
                                 <div class="row g-1 font-monospace" style="font-size: 0.7rem;">
-                                    <div class="col-6">
-                                        <span class="text-muted">Plain vs Cipher: </span>
+                                    <div class="col-12 d-flex justify-content-between align-items-center">
+                                        <span class="text-muted" id="metricCorrRefTitle">Plain vs Cipher: </span>
                                         <span id="metricCorrPlainCipher" class="fw-bold text-dark">-</span>
                                     </div>
-                                    <div class="col-6">
-                                        <span class="text-muted">Adjacent (H): </span>
-                                        <span id="metricCorrAdjacent" class="fw-bold text-dark">-</span>
+                                    <div class="col-12 mt-1 pt-1 border-top" style="font-size: 0.66rem;">
+                                        <div class="d-flex justify-content-between text-muted mb-0.5">
+                                            <span>Adjacent (RGB Rerata):</span>
+                                            <span id="metricCorrAdjTotal" class="badge bg-light text-secondary border font-monospace py-0 px-1">Rerata: -</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between text-secondary">
+                                            <span>H: <strong id="metricCorrAdjH" class="text-dark">-</strong></span>
+                                            <span>V: <strong id="metricCorrAdjV" class="text-dark">-</strong></span>
+                                            <span>D: <strong id="metricCorrAdjD" class="text-dark">-</strong></span>
+                                        </div>
+                                        <div id="metricCorrChannelBreakdown" class="text-muted text-truncate mt-0.5" style="font-size: 0.61rem;" title="Rincian kanal R, G, B untuk Horizontal, Vertikal, dan Diagonal">
+                                            R/G/B: H(-/-/-) V(-/-/-) D(-/-/-)
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -374,7 +384,7 @@
                                 </div>
                             </div>
 
-                            <!-- 4. Pixel Equality -->
+                            <!-- 4. Pixel Equality & Difference -->
                             <div class="metric-card mb-0">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="metric-title text-dark">
@@ -384,7 +394,7 @@
                                 </div>
                                 <div class="d-flex justify-content-between align-items-baseline">
                                     <span id="metricEqualityVal" class="metric-val text-dark">-</span>
-                                    <span class="metric-sub" id="metricNPCRVal">NPCR: -</span>
+                                    <span class="metric-sub" id="metricDiffVal">Piksel Berbeda: -</span>
                                 </div>
                                 <div class="metric-sub text-muted mt-0.5" id="metricRefLabel" style="font-size: 0.65rem;">
                                     Perbandingan: Input vs Hasil
@@ -936,6 +946,7 @@
                     }
                 }
 
+                const originalLength = width * height * 3;
                 const totalBlocks = Math.ceil(rgbBytes.length / 16);
 
                 // UI Progress Element
@@ -1002,11 +1013,14 @@
                 const endTime = performance.now();
                 const duration = ((endTime - startTime) / 1000).toFixed(2);
 
+                // Potong processedRgb tepat ke originalLength sebelum pemetaan canvas, histogram, dan komparasi
+                const finalRgb = processedRgb.slice(0, originalLength);
+
                 let idx = 0;
                 for (let i = 0; i < data.length; i += 4) {
-                    data[i]     = processedRgb[idx++]; // R
-                    data[i + 1] = processedRgb[idx++]; // G
-                    data[i + 2] = processedRgb[idx++]; // B
+                    data[i]     = finalRgb[idx++]; // R
+                    data[i + 1] = finalRgb[idx++]; // G
+                    data[i + 2] = finalRgb[idx++]; // B
                     data[i + 3] = 255;
                 }
 
@@ -1022,25 +1036,25 @@
 
                 lastProcessedMode = mode;
                 lastResultData = {
-                    rgbBytes: processedRgb,
+                    rgbBytes: finalRgb,
                     width: canvas.width,
                     height: canvas.height,
                     mode: mode
                 };
 
                 if (!initialOriginalRgb && mode === 'encrypt') {
-                    initialOriginalRgb = new Uint8Array(rgbBytes);
+                    initialOriginalRgb = new Uint8Array(rgbBytes.slice(0, originalLength));
                 }
 
                 updateResultActions(mode);
-                displayMeasurements(mode, rgbBytes, processedRgb, canvas.width, canvas.height);
+                displayMeasurements(mode, rgbBytes.slice(0, originalLength), finalRgb, canvas.width, canvas.height);
 
                 // Render Histogram Hasil & Analisis Keseragaman Chi-Square
-                currentResultHistogramData = computeHistogram(processedRgb);
+                currentResultHistogramData = computeHistogram(finalRgb);
                 document.getElementById('resultHistCanvas').classList.remove('d-none');
                 document.getElementById('resultHistPlaceholder').classList.add('d-none');
                 drawHistogram('resultHistCanvas', currentResultHistogramData, currentResultChannel);
-                updateHistogramAnalysis(mode, currentResultHistogramData, processedRgb.length);
+                updateHistogramAnalysis(mode, currentResultHistogramData, finalRgb.length);
 
                 const downloadBtn = document.getElementById('downloadBtn');
                 downloadBtn.href = resCanvas.toDataURL('image/png');
@@ -1083,6 +1097,12 @@
                 <span>Sumber: Hasil ${lastProcessedMode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'}</span>
             `;
 
+            // Hitung ulang histogram input dari currentRgb lalu gambarkan
+            currentInputHistogramData = computeHistogram(currentRgb);
+            document.getElementById('inputHistCanvas').classList.remove('d-none');
+            document.getElementById('inputHistPlaceholder').classList.add('d-none');
+            drawHistogram('inputHistCanvas', currentInputHistogramData, currentInputChannel);
+
             // Buat Image untuk loadedImage
             const img = new Image();
             img.src = dataUrl;
@@ -1096,6 +1116,7 @@
             if (!lastResultData) return;
             const resCanvas = document.getElementById('resultCanvas');
             const dataUrl = resCanvas.toDataURL('image/png');
+            const currentRgb = lastResultData.rgbBytes;
 
             const origPreview = document.getElementById('originalPreview');
             origPreview.src = dataUrl;
@@ -1134,13 +1155,12 @@
             document.getElementById('metricStatusText').textContent = '-';
             document.getElementById('metricCalcTime').textContent = 'Hitung: -';
 
-            // Transfer Histogram Hasil ke Histogram Input
-            if (currentResultHistogramData) {
-                currentInputHistogramData = currentResultHistogramData;
-                document.getElementById('inputHistCanvas').classList.remove('d-none');
-                document.getElementById('inputHistPlaceholder').classList.add('d-none');
-                drawHistogram('inputHistCanvas', currentInputHistogramData, currentInputChannel);
-            }
+            // Hitung ulang histogram input dari data gambar saat ini
+            currentInputHistogramData = computeHistogram(currentRgb);
+            document.getElementById('inputHistCanvas').classList.remove('d-none');
+            document.getElementById('inputHistPlaceholder').classList.add('d-none');
+            drawHistogram('inputHistCanvas', currentInputHistogramData, currentInputChannel);
+
             currentResultHistogramData = null;
             document.getElementById('resultHistCanvas').classList.add('d-none');
             document.getElementById('resultHistPlaceholder').classList.remove('d-none');
@@ -1157,7 +1177,6 @@
         // ==========================================
         function calculateMeasurements(inputRgb, resultRgb, width, height, compareRgb = null) {
             const startTime = performance.now();
-            const N = Math.min(inputRgb.length, resultRgb.length);
 
             // 1. Shannon Entropy (Keacakan byte gambar hasil)
             const counts = new Uint32Array(256);
@@ -1186,7 +1205,7 @@
             const mse = sumSqErr / refN;
             const psnr = mse === 0 ? Infinity : 10 * Math.log10((255 * 255) / mse);
 
-            // 3. Pixel Equality (Kesamaan Piksel) & NPCR
+            // 3. Kesamaan Piksel & Persentase Piksel Berbeda
             const totalPixels = width * height;
             let equalPixels = 0;
             for (let p = 0; p < totalPixels; p++) {
@@ -1200,9 +1219,9 @@
                 }
             }
             const pixelEquality = (equalPixels / totalPixels) * 100;
-            const npcr = ((totalPixels - equalPixels) / totalPixels) * 100;
+            const diffPixelsPct = ((totalPixels - equalPixels) / totalPixels) * 100;
 
-            // 4. Correlation Coefficient (Korelasi Piksel Referensi vs Hasil)
+            // 4. Korelasi Referensi vs Hasil (Plain vs Cipher / Hasil vs Asli)
             let sumX = 0, sumY = 0;
             for (let i = 0; i < refN; i++) {
                 sumX += refRgb[i];
@@ -1221,32 +1240,77 @@
             }
             const correlation = (denX === 0 || denY === 0) ? 0 : num / Math.sqrt(denX * denY);
 
-            // Adjacent Horizontal Correlation (Piksel Bersebelahan pada Gambar Hasil)
-            let sumAdjX = 0, sumAdjY = 0, adjCount = 0;
+            // 5. Korelasi Adjacent (Horizontal, Vertikal, Diagonal) untuk Channel R, G, B
+            const NH = (width - 1) * height;
+            const NV = width * (height - 1);
+            const ND = (width - 1) * (height - 1);
+
+            const sX_H = [0, 0, 0], sY_H = [0, 0, 0], sX2_H = [0, 0, 0], sY2_H = [0, 0, 0], sXY_H = [0, 0, 0];
+            const sX_V = [0, 0, 0], sY_V = [0, 0, 0], sX2_V = [0, 0, 0], sY2_V = [0, 0, 0], sXY_V = [0, 0, 0];
+            const sX_D = [0, 0, 0], sY_D = [0, 0, 0], sX2_D = [0, 0, 0], sY2_D = [0, 0, 0], sXY_D = [0, 0, 0];
+
             for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width - 1; x++) {
-                    const idx1 = (y * width + x) * 3;
-                    const idx2 = (y * width + (x + 1)) * 3;
-                    sumAdjX += resultRgb[idx1];
-                    sumAdjY += resultRgb[idx2];
-                    adjCount++;
+                for (let x = 0; x < width; x++) {
+                    const curr = (y * width + x) * 3;
+                    const hasRight = x < width - 1;
+                    const hasDown = y < height - 1;
+
+                    if (hasRight) {
+                        const right = (y * width + (x + 1)) * 3;
+                        for (let c = 0; c < 3; c++) {
+                            const u = resultRgb[curr + c];
+                            const v = resultRgb[right + c];
+                            sX_H[c] += u; sY_H[c] += v;
+                            sX2_H[c] += u * u; sY2_H[c] += v * v;
+                            sXY_H[c] += u * v;
+                        }
+                    }
+
+                    if (hasDown) {
+                        const down = ((y + 1) * width + x) * 3;
+                        for (let c = 0; c < 3; c++) {
+                            const u = resultRgb[curr + c];
+                            const v = resultRgb[down + c];
+                            sX_V[c] += u; sY_V[c] += v;
+                            sX2_V[c] += u * u; sY2_V[c] += v * v;
+                            sXY_V[c] += u * v;
+                        }
+                    }
+
+                    if (hasRight && hasDown) {
+                        const diag = ((y + 1) * width + (x + 1)) * 3;
+                        for (let c = 0; c < 3; c++) {
+                            const u = resultRgb[curr + c];
+                            const v = resultRgb[diag + c];
+                            sX_D[c] += u; sY_D[c] += v;
+                            sX2_D[c] += u * u; sY2_D[c] += v * v;
+                            sXY_D[c] += u * v;
+                        }
+                    }
                 }
             }
-            const meanAdjX = sumAdjX / adjCount;
-            const meanAdjY = sumAdjY / adjCount;
-            let numAdj = 0, denAdjX = 0, denAdjY = 0;
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width - 1; x++) {
-                    const idx1 = (y * width + x) * 3;
-                    const idx2 = (y * width + (x + 1)) * 3;
-                    const dx = resultRgb[idx1] - meanAdjX;
-                    const dy = resultRgb[idx2] - meanAdjY;
-                    numAdj += dx * dy;
-                    denAdjX += dx * dx;
-                    denAdjY += dy * dy;
-                }
+
+            function calcPearson(N, sX, sY, sX2, sY2, sXY) {
+                if (N <= 0) return 0;
+                const numerator = N * sXY - sX * sY;
+                const denominator = Math.sqrt((N * sX2 - sX * sX) * (N * sY2 - sY * sY));
+                return denominator === 0 ? 0 : numerator / denominator;
             }
-            const adjCorrelation = (denAdjX === 0 || denAdjY === 0) ? 0 : numAdj / Math.sqrt(denAdjX * denAdjY);
+
+            const hR = calcPearson(NH, sX_H[0], sY_H[0], sX2_H[0], sY2_H[0], sXY_H[0]);
+            const hG = calcPearson(NH, sX_H[1], sY_H[1], sX2_H[1], sY2_H[1], sXY_H[1]);
+            const hB = calcPearson(NH, sX_H[2], sY_H[2], sX2_H[2], sY2_H[2], sXY_H[2]);
+            const hAvg = (hR + hG + hB) / 3;
+
+            const vR = calcPearson(NV, sX_V[0], sY_V[0], sX2_V[0], sY2_V[0], sXY_V[0]);
+            const vG = calcPearson(NV, sX_V[1], sY_V[1], sX2_V[1], sY2_V[1], sXY_V[1]);
+            const vB = calcPearson(NV, sX_V[2], sY_V[2], sX2_V[2], sY2_V[2], sXY_V[2]);
+            const vAvg = (vR + vG + vB) / 3;
+
+            const dR = calcPearson(ND, sX_D[0], sY_D[0], sX2_D[0], sY2_D[0], sXY_D[0]);
+            const dG = calcPearson(ND, sX_D[1], sY_D[1], sX2_D[1], sY2_D[1], sXY_D[1]);
+            const dB = calcPearson(ND, sX_D[2], sY_D[2], sX2_D[2], sY2_D[2], sXY_D[2]);
+            const dAvg = (dR + dG + dB) / 3;
 
             const calcTime = (performance.now() - startTime).toFixed(1);
 
@@ -1255,9 +1319,14 @@
                 mse,
                 psnr,
                 pixelEquality,
-                npcr,
+                diffPixelsPct,
                 correlation,
-                adjCorrelation,
+                adjacent: {
+                    h: { r: hR, g: hG, b: hB, avg: hAvg },
+                    v: { r: vR, g: vG, b: vB, avg: vAvg },
+                    d: { r: dR, g: dG, b: dB, avg: dAvg },
+                    totalAvg: (hAvg + vAvg + dAvg) / 3
+                },
                 calcTime
             };
         }
@@ -1300,17 +1369,32 @@
             }
 
             // 2. Correlation
+            const corrRefTitle = document.getElementById('metricCorrRefTitle');
+            if (corrRefTitle) {
+                corrRefTitle.textContent = (mode === 'decrypt' && compareRgb) ? 'Hasil vs Asli: ' : 'Plain vs Cipher: ';
+            }
             document.getElementById('metricCorrPlainCipher').textContent = m.correlation.toFixed(4);
-            document.getElementById('metricCorrAdjacent').textContent = m.adjCorrelation.toFixed(4);
+
+            // Adjacent Correlation H, V, D & channel breakdown
+            document.getElementById('metricCorrAdjH').textContent = m.adjacent.h.avg.toFixed(4);
+            document.getElementById('metricCorrAdjV').textContent = m.adjacent.v.avg.toFixed(4);
+            document.getElementById('metricCorrAdjD').textContent = m.adjacent.d.avg.toFixed(4);
+            document.getElementById('metricCorrAdjTotal').textContent = `Rerata: ${m.adjacent.totalAvg.toFixed(4)}`;
+
+            const breakdownEl = document.getElementById('metricCorrChannelBreakdown');
+            if (breakdownEl) {
+                breakdownEl.textContent = `R/G/B: H(${m.adjacent.h.r.toFixed(2)}/${m.adjacent.h.g.toFixed(2)}/${m.adjacent.h.b.toFixed(2)}) V(${m.adjacent.v.r.toFixed(2)}/${m.adjacent.v.g.toFixed(2)}/${m.adjacent.v.b.toFixed(2)}) D(${m.adjacent.d.r.toFixed(2)}/${m.adjacent.d.g.toFixed(2)}/${m.adjacent.d.b.toFixed(2)})`;
+                breakdownEl.title = `Horizontal: R=${m.adjacent.h.r.toFixed(4)}, G=${m.adjacent.h.g.toFixed(4)}, B=${m.adjacent.h.b.toFixed(4)}\nVertikal: R=${m.adjacent.v.r.toFixed(4)}, G=${m.adjacent.v.g.toFixed(4)}, B=${m.adjacent.v.b.toFixed(4)}\nDiagonal: R=${m.adjacent.d.r.toFixed(4)}, G=${m.adjacent.d.g.toFixed(4)}, B=${m.adjacent.d.b.toFixed(4)}`;
+            }
 
             // 3. MSE & PSNR
             document.getElementById('metricMSEVal').textContent = m.mse.toFixed(2);
             const psnrText = m.psnr === Infinity ? 'Lossless (∞ dB)' : `${m.psnr.toFixed(2)} dB`;
             document.getElementById('metricPSNRVal').textContent = `PSNR: ${psnrText}`;
 
-            // 4. Pixel Equality
+            // 4. Pixel Equality & Difference
             document.getElementById('metricEqualityVal').textContent = `${m.pixelEquality.toFixed(2)}%`;
-            document.getElementById('metricNPCRVal').textContent = `NPCR: ${m.npcr.toFixed(2)}%`;
+            document.getElementById('metricDiffVal').textContent = `Piksel Berbeda: ${m.diffPixelsPct.toFixed(2)}%`;
             document.getElementById('metricRefLabel').textContent = `Perbandingan: ${compareLabel}`;
 
             const equalityBadge = document.getElementById('metricEqualityBadge');
@@ -1325,7 +1409,19 @@
                 equalityBadge.className = 'badge bg-warning text-dark';
             }
 
-            document.getElementById('metricStatusText').textContent = mode === 'encrypt' ? 'Terenkripsi' : 'Terdekripsi';
+            // Status evaluasi metrik berdasarkan data (bukan sekadar mode)
+            const metricStatusEl = document.getElementById('metricStatusText');
+            if (metricStatusEl) {
+                if (m.pixelEquality >= 99.99) {
+                    metricStatusEl.textContent = 'Identik (Restorasi Sempurna)';
+                } else if (m.entropy >= 7.9 && m.pixelEquality < 10) {
+                    metricStatusEl.textContent = 'Terenkripsi Kuat';
+                } else if (m.pixelEquality > 50) {
+                    metricStatusEl.textContent = 'Serupa Sebagian';
+                } else {
+                    metricStatusEl.textContent = 'Citra Terbuka / Natural';
+                }
+            }
             document.getElementById('metricCalcTime').textContent = `Hitung: ${m.calcTime} ms`;
         }
 
@@ -1479,19 +1575,21 @@
             }
             const stdDev = Math.sqrt(varSum / 256);
 
+            // Hitung Entropy dari distribusi byte hasil
+            let entropy = 0;
+            for (let i = 0; i < 256; i++) {
+                if (combined[i] > 0) {
+                    const p = combined[i] / totalBytes;
+                    entropy -= p * Math.log2(p);
+                }
+            }
+
             // Nilai Keseragaman (Uniformity %)
             const cv = stdDev / E;
             const uniformityPct = Math.max(0, Math.min(100, (1 - cv) * 100));
 
             document.getElementById('histAnalysisPlaceholder').classList.add('d-none');
             document.getElementById('histAnalysisContent').classList.remove('d-none');
-
-            const testBadge = document.getElementById('histTestBadge');
-            if (testBadge) {
-                testBadge.classList.remove('d-none');
-                testBadge.textContent = mode === 'encrypt' ? 'Ciphertext' : 'Plaintext';
-                testBadge.className = mode === 'encrypt' ? 'badge bg-danger' : 'badge bg-success';
-            }
 
             document.getElementById('chiSquareVal').textContent = chiSquare.toFixed(2);
             document.getElementById('histStdDevVal').textContent = `±${stdDev.toFixed(1)}`;
@@ -1502,29 +1600,46 @@
             const secDesc = document.getElementById('histSecurityDesc');
             const statusText = document.getElementById('histAnalysisStatus');
             const resultDistText = document.getElementById('resultHistDistText');
+            const testBadge = document.getElementById('histTestBadge');
 
-            // Nilai kritis df=255 pada alpha=0.05 adalah 293.25; alpha=0.01 adalah 310.46
-            if (chiSquare < 310.46 && mode === 'encrypt') {
-                chiBadge.textContent = 'Lolos Uji Uniform';
+            // Nilai kritis df=255 pada alpha=0.05 adalah 293.25
+            // Evaluasi status ditentukan murni berdasarkan data statistik (chiSquare & entropy), bukan mode
+            if (chiSquare <= 293.25) {
+                chiBadge.textContent = 'Lolos Uji Uniform (α=0.05)';
                 chiBadge.className = 'badge bg-success';
                 document.getElementById('histUniformityBar').className = 'progress-bar bg-success';
-                secDesc.innerHTML = `<span class="text-success fw-bold">Distribusi Seragam:</span> Histogram ciphertext sangat rata (flat). Kebal terhadap serangan analisis statistik frekuensi kemunculan byte.`;
+                secDesc.innerHTML = `<span class="text-success fw-bold">Distribusi Seragam:</span> Histogram sangat rata (flat) sesuai kriteria uji &chi;&sup2; (&chi;&sup2; = ${chiSquare.toFixed(2)} &le; 293.25, Entropi: ${entropy.toFixed(4)} bit). Tidak membocorkan pola frekuensi byte.`;
                 statusText.textContent = 'Status: Seragam (Lolos)';
                 if (resultDistText) resultDistText.textContent = 'Seragam (Flat)';
-            } else if (mode === 'encrypt') {
+                if (testBadge) {
+                    testBadge.classList.remove('d-none');
+                    testBadge.textContent = 'Data Teracak (Ciphertext)';
+                    testBadge.className = 'badge bg-danger';
+                }
+            } else if (entropy >= 7.9) {
                 chiBadge.textContent = 'Teracak Kuat';
                 chiBadge.className = 'badge bg-primary';
                 document.getElementById('histUniformityBar').className = 'progress-bar bg-primary';
-                secDesc.innerHTML = `<span class="text-primary fw-bold">Terenkripsi Kuat:</span> Distribusi byte teracak merata, seluruh pola citra asli berhasil disamarkan.`;
-                statusText.textContent = 'Status: Terenkripsi';
+                secDesc.innerHTML = `<span class="text-primary fw-bold">Terenkripsi Kuat:</span> Distribusi byte teracak merata dengan entropi tinggi (${entropy.toFixed(4)} bit, &chi;&sup2; = ${chiSquare.toFixed(2)}). Tidak membocorkan pola frekuensi byte.`;
+                statusText.textContent = 'Status: Teracak Kuat';
                 if (resultDistText) resultDistText.textContent = 'Teracak Merata';
+                if (testBadge) {
+                    testBadge.classList.remove('d-none');
+                    testBadge.textContent = 'Data Teracak (Ciphertext)';
+                    testBadge.className = 'badge bg-danger';
+                }
             } else {
                 chiBadge.textContent = 'Pola Alami (Non-Acak)';
                 chiBadge.className = 'badge bg-warning text-dark';
                 document.getElementById('histUniformityBar').className = 'progress-bar bg-warning';
-                secDesc.innerHTML = `<span class="text-secondary fw-bold">Citra Terbuka:</span> Histogram memiliki puncak dan lembah khas citra natural (non-acak).`;
+                secDesc.innerHTML = `<span class="text-secondary fw-bold">Citra Terbuka:</span> Histogram memiliki variasi puncak dan lembah khas citra natural (non-acak, Entropi: ${entropy.toFixed(4)} bit, &chi;&sup2; = ${chiSquare.toFixed(2)}).`;
                 statusText.textContent = 'Status: Citra Asli';
                 if (resultDistText) resultDistText.textContent = 'Puncak Khas';
+                if (testBadge) {
+                    testBadge.classList.remove('d-none');
+                    testBadge.textContent = 'Citra Natural (Plaintext)';
+                    testBadge.className = 'badge bg-success';
+                }
             }
         }
 
@@ -1560,6 +1675,67 @@
                 drawHistogram('resultHistCanvas', currentResultHistogramData, currentResultChannel);
             }
         });
+
+        // ==========================================
+        // VALIDASI AES TEST VECTOR (NIST FIPS-197 & SP 800-38A)
+        // ==========================================
+        function validateAESTestVectors() {
+            try {
+                // Vector 1: FIPS-197 Appendix C.3 (AES-256 ECB)
+                const fipsKey = new Uint8Array([
+                    0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
+                    0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f
+                ]);
+                const fipsPt = new Uint8Array([
+                    0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff
+                ]);
+                const expCtFips = [0x8e,0xa2,0xb7,0xca,0x51,0x67,0x45,0xbf,0xea,0xfc,0x49,0x90,0x4b,0x49,0x60,0x89];
+                const rkFips = keyExpansion(fipsKey);
+                const ctFips = encryptBlock(fipsPt, rkFips);
+                const decFips = decryptBlock(ctFips, rkFips);
+
+                const fipsEncOk = ctFips.every((b, i) => b === expCtFips[i]);
+                const fipsDecOk = decFips.every((b, i) => b === fipsPt[i]);
+
+                // Vector 2: NIST SP 800-38A Section F.2.5 (AES-256 CBC Block 1)
+                const cbcKey = new Uint8Array([
+                    0x60,0x3d,0xeb,0x10,0x15,0xca,0x71,0xbe,0x2b,0x73,0xae,0xf0,0x85,0x7d,0x77,0x81,
+                    0x1f,0x35,0x2c,0x07,0x3b,0x61,0x08,0xd7,0x2d,0x98,0x10,0xa3,0x09,0x14,0xdf,0xf4
+                ]);
+                const cbcIv = new Uint8Array([
+                    0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f
+                ]);
+                const cbcPt = new Uint8Array([
+                    0x6b,0xc1,0xbe,0xe2,0x2e,0x40,0x9f,0x96,0xe9,0x3d,0x7e,0x11,0x73,0x93,0x17,0x2a
+                ]);
+                const expCtCbc = [0xf5,0x8c,0x4c,0x04,0xd6,0xe5,0xf1,0xba,0x77,0x9e,0xab,0xfb,0x5f,0x7b,0xfb,0xd6];
+                const cbcRk = keyExpansion(cbcKey);
+                let xorPt = new Uint8Array(16);
+                for (let i = 0; i < 16; i++) xorPt[i] = cbcPt[i] ^ cbcIv[i];
+                const ctCbc = encryptBlock(xorPt, cbcRk);
+                const cbcOk = ctCbc.every((b, i) => b === expCtCbc[i]);
+
+                const allValid = fipsEncOk && fipsDecOk && cbcOk;
+                const nistBadge = document.getElementById('nistBadge');
+                if (nistBadge) {
+                    if (allValid) {
+                        nistBadge.className = 'badge bg-success-subtle text-success font-monospace';
+                        nistBadge.innerHTML = '<i class="bi bi-patch-check-fill me-1"></i>FIPS-197 / SP 800-38A OK';
+                    } else {
+                        nistBadge.className = 'badge bg-danger-subtle text-danger font-monospace';
+                        nistBadge.innerHTML = '<i class="bi bi-x-circle me-1"></i>Test Vector Failed';
+                    }
+                }
+                console.log(`[AES Self-Test] FIPS-197 Encrypt: ${fipsEncOk}, Decrypt: ${fipsDecOk}, SP 800-38A CBC: ${cbcOk}`);
+                return allValid;
+            } catch (err) {
+                console.error('[AES Self-Test Exception]', err);
+                return false;
+            }
+        }
+
+        // Jalankan verifikasi test vector saat startup
+        validateAESTestVectors();
         </script>
 </body>
 </html>
