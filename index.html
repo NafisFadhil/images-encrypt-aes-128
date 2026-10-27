@@ -85,6 +85,7 @@
             border-color: #0d6efd;
             background-color: #f0f7ff;
         }
+
     </style>
 </head>
 <body class="bg-light">
@@ -141,17 +142,10 @@
 
                         <div>
                             <!-- Action Buttons -->
-                            <div class="row g-1 mb-1">
-                                <div class="col-6">
-                                    <button id="btnEncrypt" onclick="processImage('encrypt')" class="btn btn-sm btn-primary w-100 fw-semibold" disabled>
-                                        <i class="bi bi-lock-fill me-1"></i> Enkripsi
-                                    </button>
-                                </div>
-                                <div class="col-6">
-                                    <button id="btnDecrypt" onclick="processImage('decrypt')" class="btn btn-sm btn-success w-100 fw-semibold" disabled>
-                                        <i class="bi bi-unlock-fill me-1"></i> Dekripsi
-                                    </button>
-                                </div>
+                            <div class="mb-1">
+                                <button id="btnEncrypt" onclick="processImage('both')" class="btn btn-sm btn-primary w-100 fw-semibold py-1.5" disabled>
+                                    <i class="bi bi-shield-lock-fill me-1"></i> Jalankan Enkripsi & Dekripsi Langsung
+                                </button>
                             </div>
 
                             <!-- Info Progress Bar -->
@@ -249,160 +243,220 @@
 
         </div>
 
-        <!-- Baris 2: Preview Gambar Input, Hasil, & Measurement (3 Kolom: 4 : 4 : 4) -->
+        <!-- Baris 2: File Asli, Hasil Enkripsi & Dekripsi Langsung, & Semua Matriks (3 Kolom: 4 : 4 : 4) -->
         <div class="row g-2 mb-2">
-            <!-- Kolom 1: Original Image Display -->
+            <!-- Kolom 1: File Asli (Original Image Display) -->
             <div class="col-lg-4 col-md-6">
                 <div class="card h-100">
-                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center py-1">
                         <div>
-                            <i class="bi bi-file-earmark-image text-secondary me-1"></i> <span id="inputTitle">Gambar Input / Asli</span>
+                            <i class="bi bi-file-earmark-image text-primary me-1"></i> <span id="inputTitle">File Asli (Plaintext)</span>
                         </div>
-                        <span id="inputBadge" class="badge bg-secondary d-none"></span>
+                        <span id="inputBadge" class="badge bg-primary-subtle text-primary font-monospace" style="font-size: 0.65rem;">Original</span>
                     </div>
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light" style="min-height: 155px; max-height: 160px;">
-                        <img id="originalPreview" class="img-fluid rounded d-none" style="max-height: 145px; object-fit: contain;" alt="Original Preview">
-                        <div id="originalPlaceholder" class="text-muted text-center py-2">
-                            <i class="bi bi-image fs-3 d-block text-secondary-subtle mb-1"></i>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light" style="min-height: 220px;">
+                        <img id="originalPreview" class="img-fluid rounded d-none" style="max-height: 205px; object-fit: contain;" alt="Original Preview">
+                        <div id="originalPlaceholder" class="text-muted text-center py-4">
+                            <i class="bi bi-image fs-1 d-block text-secondary-subtle mb-1"></i>
                             <span style="font-size: 0.75rem;">Belum ada gambar yang dipilih</span>
                         </div>
                     </div>
-                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace" id="originalDetails">
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace py-1" id="originalDetails">
                         <span>Dimensi: -</span>
                         <span>Ukuran: -</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Kolom 2: Result Image Display -->
+            <!-- Kolom 2: Hasil Enkripsi & Dekripsi Langsung -->
             <div class="col-lg-4 col-md-6">
                 <div class="card h-100">
-                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center py-1">
                         <div>
-                            <i class="bi bi-shield-check text-success me-1"></i> <span id="resultTitle">Hasil Enkripsi / Dekripsi</span>
+                            <i class="bi bi-shield-check text-success me-1"></i> <span>Hasil Enkripsi & Dekripsi</span>
                         </div>
-                        <span id="resultBadge" class="badge bg-secondary d-none"></span>
+                        <span id="resultBadge" class="badge bg-secondary-subtle text-secondary font-monospace" style="font-size: 0.65rem;">Standby</span>
                     </div>
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light" style="min-height: 155px; max-height: 160px;">
-                        <canvas id="resultCanvas" class="img-fluid rounded d-none" style="max-height: 145px; object-fit: contain;"></canvas>
-                        <div id="resultPlaceholder" class="text-muted text-center py-2">
-                            <i class="bi bi-cpu fs-3 d-block text-secondary-subtle mb-1"></i>
-                            <span style="font-size: 0.75rem;">Jalankan proses untuk melihat hasil</span>
+                    <div class="card-body p-2 d-flex flex-column justify-content-between" style="min-height: 220px;">
+                        <div class="row g-2 h-100">
+                            <!-- Sub-box 1: Hasil Enkripsi (Ciphertext) -->
+                            <div class="col-6 d-flex flex-column">
+                                <div class="border rounded p-1.5 bg-light d-flex flex-column justify-content-between h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-danger-subtle text-danger font-monospace" style="font-size: 0.65rem;">
+                                            <i class="bi bi-lock-fill me-0.5"></i> Ciphertext
+                                        </span>
+                                        <span class="text-muted" style="font-size: 0.62rem;">Enkripsi</span>
+                                    </div>
+                                    <div class="d-flex flex-column justify-content-center align-items-center my-auto" style="min-height: 140px;">
+                                        <canvas id="cipherCanvas" class="img-fluid rounded d-none" style="max-height: 135px; object-fit: contain;"></canvas>
+                                        <div id="cipherPlaceholder" class="text-muted text-center py-3">
+                                            <i class="bi bi-lock fs-3 d-block text-secondary-subtle mb-1"></i>
+                                            <span style="font-size: 0.68rem;">Belum dienkripsi</span>
+                                        </div>
+                                    </div>
+                                    <a id="downloadCipherBtn" class="btn btn-sm btn-outline-danger d-none py-0.5 px-1 mt-1 w-100 font-monospace fw-semibold" style="font-size: 0.65rem;" href="#" download="ciphertext_aes256.png">
+                                        <i class="bi bi-download me-1"></i>Unduh Cipher
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Sub-box 2: Hasil Dekripsi (Plaintext) -->
+                            <div class="col-6 d-flex flex-column">
+                                <div class="border rounded p-1.5 bg-light d-flex flex-column justify-content-between h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-success-subtle text-success font-monospace" style="font-size: 0.65rem;">
+                                            <i class="bi bi-unlock-fill me-0.5"></i> Dekripsi
+                                        </span>
+                                        <span class="text-muted" style="font-size: 0.62rem;">Restorasi</span>
+                                    </div>
+                                    <div class="d-flex flex-column justify-content-center align-items-center my-auto" style="min-height: 140px;">
+                                        <canvas id="decryptCanvas" class="img-fluid rounded d-none" style="max-height: 135px; object-fit: contain;"></canvas>
+                                        <div id="decryptPlaceholder" class="text-muted text-center py-3">
+                                            <i class="bi bi-unlock fs-3 d-block text-secondary-subtle mb-1"></i>
+                                            <span style="font-size: 0.68rem;">Belum didekripsi</span>
+                                        </div>
+                                    </div>
+                                    <a id="downloadDecryptBtn" class="btn btn-sm btn-outline-success d-none py-0.5 px-1 mt-1 w-100 font-monospace fw-semibold" style="font-size: 0.65rem;" href="#" download="decrypted_aes256.png">
+                                        <i class="bi bi-download me-1"></i>Unduh Dekripsi
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-white text-muted d-flex justify-content-between align-items-center flex-wrap gap-1" id="resultDetails">
-                        <span id="processTime" class="font-monospace">Waktu: -</span>
-                        <div class="d-flex gap-1 align-items-center flex-wrap">
-                            <button id="btnReverseAction" class="btn btn-sm btn-success d-none py-0 px-2 fw-semibold" style="font-size: 0.7rem;" onclick="reverseProcess()">
-                                <i id="btnReverseIcon" class="bi bi-unlock-fill me-1"></i> <span id="btnReverseText">Dekripsi</span>
-                            </button>
-                            <button id="btnUseAsInput" class="btn btn-sm btn-outline-secondary d-none py-0 px-2 fw-semibold" style="font-size: 0.7rem;" onclick="useResultAsInput()">
-                                <i class="bi bi-arrow-left-right me-1"></i> Gunakan
-                            </button>
-                            <a id="downloadBtn" class="btn btn-sm btn-outline-primary d-none py-0 px-2 fw-semibold" style="font-size: 0.7rem;" href="#" download>
-                                <i class="bi bi-download me-1"></i> Unduh
-                            </a>
-                        </div>
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between align-items-center font-monospace py-1" id="resultDetails">
+                        <span id="processTime">Waktu: -</span>
+                        <span id="processStatus" class="badge bg-light text-secondary border">Siap</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Kolom 3: Measurement Container -->
+            <!-- Kolom 3: Semua Matriks Pengukuran (Angka Saja, Tanpa Tab & Grafik) -->
             <div class="col-lg-4 col-md-12">
                 <div class="card h-100">
-                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center py-1">
                         <div>
-                            <i class="bi bi-speedometer2 text-primary me-1"></i> <span id="measureTitle">Hasil Pengukuran</span>
+                            <i class="bi bi-speedometer2 text-primary me-1"></i> <span id="measureTitle">Matriks Pengukuran</span>
                         </div>
-                        <span id="metricBadge" class="badge bg-secondary d-none">Siap</span>
+                        <span id="metricBadge" class="badge bg-secondary-subtle text-secondary font-monospace" style="font-size: 0.65rem;">Standby</span>
                     </div>
-                    <div class="card-body d-flex flex-column justify-content-between" style="min-height: 155px;">
-                        <div id="measurePlaceholder" class="text-muted text-center py-3 my-auto">
-                            <i class="bi bi-calculator fs-3 d-block text-secondary-subtle mb-1"></i>
-                            <span style="font-size: 0.75rem;">Jalankan proses untuk menampilkan metrik kriptografi</span>
+                    <div class="card-body p-2 d-flex flex-column justify-content-between" style="min-height: 220px;">
+                        
+                        <!-- Semua Matriks Pengukuran (Angka Saja, Format Seragam) -->
+                        <div class="row g-1">
+                            <!-- CC -->
+                            <div class="col-6">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">CC</span>
+                                        <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Korelasi</span>
+                                    </div>
+                                    <div id="iemCC" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs encrypted</div>
+                                </div>
+                            </div>
+
+                            <!-- NCC -->
+                            <div class="col-6">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">NCC</span>
+                                        <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Norm. X-Corr</span>
+                                    </div>
+                                    <div id="iemNCC" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs encrypted</div>
+                                </div>
+                            </div>
+
+                            <!-- SSIM -->
+                            <div class="col-6">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">SSIM</span>
+                                        <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Struktur</span>
+                                    </div>
+                                    <div id="iemSSIM" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs encrypted</div>
+                                </div>
+                            </div>
+
+                            <!-- SSIM setelah dekripsi -->
+                            <div class="col-6">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary fw-semibold text-truncate" style="font-size: 0.68rem;" title="SSIM setelah dekripsi">SSIM Dekripsi</span>
+                                        <span id="iemBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Standby</span>
+                                    </div>
+                                    <div id="iemSSIMDec" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs decrypted</div>
+                                </div>
+                            </div>
+                            <!-- Shannon Entropy -->
+                            <div class="col-6">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Entropy (Shannon)</span>
+                                        <span id="metricEntropyBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Skala 0-8</span>
+                                    </div>
+                                    <div id="metricEntropyVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                    <div class="text-muted" style="font-size: 0.6rem;">Ideal: ~8.0000 bit</div>
+                                </div>
+                            </div>
+
+                            <!-- PSNR -->
+                            <div class="col-6">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">PSNR (Dekripsi)</span>
+                                        <span id="metricPSNRValBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">dB</span>
+                                    </div>
+                                    <div id="metricPSNRVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                    <div class="text-muted" style="font-size: 0.6rem;">Lossless: ∞ dB</div>
+                                </div>
+                            </div>
+
+                            <!-- MSE -->
+                            <div class="col-6">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">MSE (Cipher)</span>
+                                        <span class="text-muted" style="font-size: 0.58rem;">Rerata Galat</span>
+                                    </div>
+                                    <div id="metricMSEVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                    <div class="text-muted" style="font-size: 0.6rem;">Mean Squared Error</div>
+                                </div>
+                            </div>
+
+                            <!-- Pixel Equality -->
+                            <div class="col-6">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Pixel Equality</span>
+                                        <span id="metricEqualityBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">—</span>
+                                    </div>
+                                    <div id="metricEqualityVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                    <div class="text-muted text-truncate" id="metricDiffVal" style="font-size: 0.6rem;">Piksel Berbeda: —</div>
+                                </div>
+                            </div>
+
+                            <!-- Adjacent Correlation Numbers -->
+                            <div class="col-12">
+                                <div class="p-1 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center mb-0.5">
+                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Korelasi Adjacent (Piksel Tetangga)</span>
+                                        <span id="metricCorrAdjTotal" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.6rem;">Rerata: —</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between font-monospace text-secondary" style="font-size: 0.67rem;">
+                                        <span>H: <strong id="metricCorrAdjH" class="text-dark">—</strong></span>
+                                        <span>V: <strong id="metricCorrAdjV" class="text-dark">—</strong></span>
+                                        <span>D: <strong id="metricCorrAdjD" class="text-dark">—</strong></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div id="measureContent" class="d-none">
-                            <!-- 1. Entropy -->
-                            <div class="metric-card">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="metric-title text-dark">
-                                        <i class="bi bi-shuffle text-primary me-1"></i> Entropy (Shannon)
-                                    </span>
-                                    <span id="metricEntropyBadge" class="badge bg-primary-subtle text-primary font-monospace py-0 px-1" style="font-size: 0.65rem;">Ideal: ~8.0</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-baseline">
-                                    <span id="metricEntropyVal" class="metric-val text-dark">-</span>
-                                    <span class="metric-sub" id="metricEntropySub">Skala: 0 - 8 bit</span>
-                                </div>
-                                <div class="progress mt-0.5" style="height: 3px;">
-                                    <div id="metricEntropyBar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
-                                </div>
-                            </div>
-
-                            <!-- 2. Correlation Coefficient -->
-                            <div class="metric-card">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="metric-title text-dark">
-                                        <i class="bi bi-bezier2 text-primary me-1"></i> Correlation Coefficient
-                                    </span>
-                                    <span id="metricCorrBadge" class="badge bg-secondary-subtle text-secondary font-monospace py-0 px-1" style="font-size: 0.65rem;">Ideal: ~0</span>
-                                </div>
-                                <div class="row g-1 font-monospace" style="font-size: 0.7rem;">
-                                    <div class="col-12 d-flex justify-content-between align-items-center">
-                                        <span class="text-muted" id="metricCorrRefTitle">Plain vs Cipher: </span>
-                                        <span id="metricCorrPlainCipher" class="fw-bold text-dark">-</span>
-                                    </div>
-                                    <div class="col-12 mt-1 pt-1 border-top" style="font-size: 0.66rem;">
-                                        <div class="d-flex justify-content-between text-muted mb-0.5">
-                                            <span>Adjacent (RGB Rerata):</span>
-                                            <span id="metricCorrAdjTotal" class="badge bg-light text-secondary border font-monospace py-0 px-1">Rerata: -</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between text-secondary">
-                                            <span>H: <strong id="metricCorrAdjH" class="text-dark">-</strong></span>
-                                            <span>V: <strong id="metricCorrAdjV" class="text-dark">-</strong></span>
-                                            <span>D: <strong id="metricCorrAdjD" class="text-dark">-</strong></span>
-                                        </div>
-                                        <div id="metricCorrChannelBreakdown" class="text-muted text-truncate mt-0.5" style="font-size: 0.61rem;" title="Rincian kanal R, G, B untuk Horizontal, Vertikal, dan Diagonal">
-                                            R/G/B: H(-/-/-) V(-/-/-) D(-/-/-)
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 3. MSE & PSNR -->
-                            <div class="metric-card">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="metric-title text-dark">
-                                        <i class="bi bi-graph-down text-primary me-1"></i> MSE & PSNR
-                                    </span>
-                                    <span id="metricPSNRVal" class="badge bg-info-subtle text-info font-monospace py-0 px-1" style="font-size: 0.65rem;">PSNR: -</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-baseline">
-                                    <span id="metricMSEVal" class="metric-val text-dark">-</span>
-                                    <span class="metric-sub">Rerata Kuadrat Galat</span>
-                                </div>
-                            </div>
-
-                            <!-- 4. Pixel Equality & Difference -->
-                            <div class="metric-card mb-0">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="metric-title text-dark">
-                                        <i class="bi bi-check2-all text-primary me-1"></i> Pixel Equality
-                                    </span>
-                                    <span id="metricEqualityBadge" class="badge bg-success py-0 px-1" style="font-size: 0.65rem;">100%</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-baseline">
-                                    <span id="metricEqualityVal" class="metric-val text-dark">-</span>
-                                    <span class="metric-sub" id="metricDiffVal">Piksel Berbeda: -</span>
-                                </div>
-                                <div class="metric-sub text-muted mt-0.5" id="metricRefLabel" style="font-size: 0.65rem;">
-                                    Perbandingan: Input vs Hasil
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace" id="measureFooter">
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace py-1" id="measureFooter">
                         <span>Status: <span id="metricStatusText">-</span></span>
                         <span id="metricCalcTime">Hitung: -</span>
                     </div>
@@ -742,6 +796,11 @@
 
         let loadedImage = null;
         let initialOriginalRgb = null;
+        let storedOriginalRgb = null;
+        let storedCipherRgb = null;
+        let storedDecryptedRgb = null;
+        let storedImageWidth = 0;
+        let storedImageHeight = 0;
         let lastProcessedMode = null;
         let lastResultData = null;
 
@@ -761,42 +820,46 @@
                 img.onload = function() {
                     loadedImage = img;
                     initialOriginalRgb = null;
+                    storedOriginalRgb = null;
+                    storedCipherRgb = null;
+                    storedDecryptedRgb = null;
+                    storedImageWidth = img.width;
+                    storedImageHeight = img.height;
                     lastProcessedMode = null;
                     lastResultData = null;
-
                     // Display preview
                     const origPreview = document.getElementById('originalPreview');
                     origPreview.src = e.target.result;
                     origPreview.classList.remove('d-none');
                     document.getElementById('originalPlaceholder').classList.add('d-none');
 
-                    document.getElementById('inputTitle').textContent = 'Gambar Input / Asli';
-                    const inputBadge = document.getElementById('inputBadge');
-                    if (inputBadge) inputBadge.classList.add('d-none');
+                    document.getElementById('inputTitle').textContent = 'File Asli (Plaintext)';
 
                     document.getElementById('originalDetails').innerHTML = `
                         <span>Dimensi: ${img.width}x${img.height} px</span>
                         <span>Ukuran: ${(file.size / 1024).toFixed(1)} KB</span>
                     `;
 
-                    // Reset tampilan hasil
-                    document.getElementById('resultCanvas').classList.add('d-none');
-                    document.getElementById('resultPlaceholder').classList.remove('d-none');
-                    document.getElementById('resultTitle').textContent = 'Hasil Enkripsi / Dekripsi';
-                    const resultBadge = document.getElementById('resultBadge');
-                    if (resultBadge) resultBadge.classList.add('d-none');
-                    document.getElementById('btnReverseAction').classList.add('d-none');
-                    document.getElementById('btnUseAsInput').classList.add('d-none');
-                    document.getElementById('downloadBtn').classList.add('d-none');
+                    // Reset tampilan hasil enkripsi & dekripsi langsung
+                    document.getElementById('cipherCanvas').classList.add('d-none');
+                    document.getElementById('cipherPlaceholder').classList.remove('d-none');
+                    document.getElementById('decryptCanvas').classList.add('d-none');
+                    document.getElementById('decryptPlaceholder').classList.remove('d-none');
+                    document.getElementById('downloadCipherBtn').classList.add('d-none');
+                    document.getElementById('downloadDecryptBtn').classList.add('d-none');
                     document.getElementById('processTime').textContent = 'Waktu: -';
+                    const procStatus = document.getElementById('processStatus');
+                    if (procStatus) {
+                        procStatus.textContent = 'Siap';
+                        procStatus.className = 'badge bg-light text-secondary border';
+                    }
+                    const resBadge = document.getElementById('resultBadge');
+                    if (resBadge) {
+                        resBadge.textContent = 'Standby';
+                        resBadge.className = 'badge bg-secondary-subtle text-secondary font-monospace';
+                    }
 
-                    // Reset tampilan measurement
-                    document.getElementById('measurePlaceholder').classList.remove('d-none');
-                    document.getElementById('measureContent').classList.add('d-none');
-                    const metricBadge = document.getElementById('metricBadge');
-                    if (metricBadge) metricBadge.classList.add('d-none');
-                    document.getElementById('metricStatusText').textContent = '-';
-                    document.getElementById('metricCalcTime').textContent = 'Hitung: -';
+                    resetAllMeasurements();
 
                     // Hitung dan gambar Histogram Input segera setelah gambar diunggah
                     const tempCanvas = document.createElement('canvas');
@@ -830,7 +893,6 @@
 
                     // Enable buttons
                     document.getElementById('btnEncrypt').disabled = false;
-                    document.getElementById('btnDecrypt').disabled = false;
                 };
                 img.src = e.target.result;
             };
@@ -852,53 +914,11 @@
         }
 
         function setButtonsDisabled(disabled) {
-            document.getElementById('btnEncrypt').disabled = disabled;
-            document.getElementById('btnDecrypt').disabled = disabled;
-            const btnReverse = document.getElementById('btnReverseAction');
-            if (btnReverse) btnReverse.disabled = disabled;
-            const btnUseAsInput = document.getElementById('btnUseAsInput');
-            if (btnUseAsInput) btnUseAsInput.disabled = disabled;
+            const btnEncrypt = document.getElementById('btnEncrypt');
+            if (btnEncrypt) btnEncrypt.disabled = disabled;
         }
 
-        function updateResultActions(mode) {
-            const btnReverse = document.getElementById('btnReverseAction');
-            const btnReverseIcon = document.getElementById('btnReverseIcon');
-            const btnReverseText = document.getElementById('btnReverseText');
-            const btnUseAsInput = document.getElementById('btnUseAsInput');
-            const resultBadge = document.getElementById('resultBadge');
-            const resultTitle = document.getElementById('resultTitle');
-
-            if (mode === 'encrypt') {
-                resultTitle.textContent = 'Hasil Enkripsi (Ciphertext)';
-                if (resultBadge) {
-                    resultBadge.textContent = 'Terenkripsi';
-                    resultBadge.className = 'badge bg-danger';
-                    resultBadge.classList.remove('d-none');
-                }
-                btnReverse.className = 'btn btn-sm btn-success fw-semibold';
-                btnReverseIcon.className = 'bi bi-unlock-fill me-1';
-                btnReverseText.textContent = 'Dekripsi Hasil';
-            } else {
-                resultTitle.textContent = 'Hasil Dekripsi (Plaintext)';
-                if (resultBadge) {
-                    resultBadge.textContent = 'Terdekripsi';
-                    resultBadge.className = 'badge bg-success';
-                    resultBadge.classList.remove('d-none');
-                }
-                btnReverse.className = 'btn btn-sm btn-primary fw-semibold';
-                btnReverseIcon.className = 'bi bi-lock-fill me-1';
-                btnReverseText.textContent = 'Enkripsi Hasil';
-            }
-
-            btnReverse.classList.remove('d-none');
-            btnReverse.disabled = false;
-            if (btnUseAsInput) {
-                btnUseAsInput.classList.remove('d-none');
-                btnUseAsInput.disabled = false;
-            }
-        }
-
-        async function processImage(mode, inputRgbBytes = null) {
+        async function processImage(mode = 'both', inputRgbBytes = null) {
             if (!loadedImage && !inputRgbBytes) return;
 
             setButtonsDisabled(true);
@@ -956,291 +976,366 @@
                 const statusLabel = document.getElementById('statusLabel');
 
                 progressContainer.classList.remove('d-none');
-                statusLabel.textContent = `Memproses mode ${mode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'} (CBC)...`;
+                statusLabel.textContent = `Memproses Enkripsi & Dekripsi AES-256 CBC...`;
+                progressBar.style.width = '30%';
+                progressPercent.textContent = '30%';
 
                 const startTime = performance.now();
-                const processedRgb = new Uint8Array(totalBlocks * 16);
 
-                let prevCipherBlock = new Uint8Array(ivBytes);
+                // 1. Enkripsi CBC
+                const cipherFull = new Uint8Array(totalBlocks * 16);
+                let prevCipher = new Uint8Array(ivBytes);
 
-                const chunkSize = 2500;
-                let blockIdx = 0;
-
-                async function processChunk() {
-                    const endBlock = Math.min(blockIdx + chunkSize, totalBlocks);
-
-                    for (; blockIdx < endBlock; blockIdx++) {
-                        const offset = blockIdx * 16;
-
-                        if (mode === 'encrypt') {
-                            let block = new Uint8Array(16);
-                            for (let b = 0; b < 16; b++) {
-                                const plainByte = (offset + b < rgbBytes.length) ? rgbBytes[offset + b] : 0;
-                                block[b] = plainByte ^ prevCipherBlock[b];
-                            }
-
-                            const resultBlock = encryptBlock(block, roundKeys);
-                            prevCipherBlock.set(resultBlock);
-                            processedRgb.set(resultBlock, offset);
-                        } else {
-                            let cipherBlock = new Uint8Array(16);
-                            for (let b = 0; b < 16; b++) {
-                                cipherBlock[b] = (offset + b < rgbBytes.length) ? rgbBytes[offset + b] : 0;
-                            }
-
-                            const decryptedBlock = decryptBlock(cipherBlock, roundKeys);
-                            let plainBlock = new Uint8Array(16);
-                            for (let b = 0; b < 16; b++) {
-                                plainBlock[b] = decryptedBlock[b] ^ prevCipherBlock[b];
-                            }
-                            prevCipherBlock.set(cipherBlock);
-                            processedRgb.set(plainBlock, offset);
-                        }
+                for (let b = 0; b < totalBlocks; b++) {
+                    const offset = b * 16;
+                    let block = new Uint8Array(16);
+                    for (let i = 0; i < 16; i++) {
+                        const pb = (offset + i < rgbBytes.length) ? rgbBytes[offset + i] : 0;
+                        block[i] = pb ^ prevCipher[i];
                     }
-
-                    const pct = Math.round((blockIdx / totalBlocks) * 100);
-                    progressBar.style.width = `${pct}%`;
-                    progressPercent.textContent = `${pct}%`;
-
-                    if (blockIdx < totalBlocks) {
-                        await new Promise(resolve => setTimeout(resolve, 0));
-                        await processChunk();
-                    }
+                    const resBlock = encryptBlock(block, roundKeys);
+                    prevCipher.set(resBlock);
+                    cipherFull.set(resBlock, offset);
                 }
 
-                await processChunk();
+                const cipherRgb = cipherFull.slice(0, originalLength);
+
+                // Render ke cipherCanvas
+                const cipherCanvas = document.getElementById('cipherCanvas');
+                cipherCanvas.width = width;
+                cipherCanvas.height = height;
+                const cCtx = cipherCanvas.getContext('2d');
+                const cImgData = cCtx.createImageData(width, height);
+                let cIdx = 0;
+                for (let i = 0; i < cImgData.data.length; i += 4) {
+                    cImgData.data[i] = cipherRgb[cIdx++];
+                    cImgData.data[i + 1] = cipherRgb[cIdx++];
+                    cImgData.data[i + 2] = cipherRgb[cIdx++];
+                    cImgData.data[i + 3] = 255;
+                }
+                cCtx.putImageData(cImgData, 0, 0);
+                cipherCanvas.classList.remove('d-none');
+                document.getElementById('cipherPlaceholder').classList.add('d-none');
+                const dlCipher = document.getElementById('downloadCipherBtn');
+                dlCipher.href = cipherCanvas.toDataURL('image/png');
+                dlCipher.classList.remove('d-none');
+
+                progressBar.style.width = '70%';
+                progressPercent.textContent = '70%';
+
+                // 2. Dekripsi CBC Langsung dari Ciphertext
+                const decFull = new Uint8Array(totalBlocks * 16);
+                let prevDecCipher = new Uint8Array(ivBytes);
+
+                for (let b = 0; b < totalBlocks; b++) {
+                    const offset = b * 16;
+                    let cBlock = new Uint8Array(16);
+                    for (let i = 0; i < 16; i++) {
+                        cBlock[i] = (offset + i < cipherFull.length) ? cipherFull[offset + i] : 0;
+                    }
+                    const decBlock = decryptBlock(cBlock, roundKeys);
+                    let pBlock = new Uint8Array(16);
+                    for (let i = 0; i < 16; i++) {
+                        pBlock[i] = decBlock[i] ^ prevDecCipher[i];
+                    }
+                    prevDecCipher.set(cBlock);
+                    decFull.set(pBlock, offset);
+                }
+
+                const decRgb = decFull.slice(0, originalLength);
+
+                // Render ke decryptCanvas
+                const decryptCanvas = document.getElementById('decryptCanvas');
+                decryptCanvas.width = width;
+                decryptCanvas.height = height;
+                const dCtx = decryptCanvas.getContext('2d');
+                const dImgData = dCtx.createImageData(width, height);
+                let dIdx = 0;
+                for (let i = 0; i < dImgData.data.length; i += 4) {
+                    dImgData.data[i] = decRgb[dIdx++];
+                    dImgData.data[i + 1] = decRgb[dIdx++];
+                    dImgData.data[i + 2] = decRgb[dIdx++];
+                    dImgData.data[i + 3] = 255;
+                }
+                dCtx.putImageData(dImgData, 0, 0);
+                decryptCanvas.classList.remove('d-none');
+                document.getElementById('decryptPlaceholder').classList.add('d-none');
+                const dlDec = document.getElementById('downloadDecryptBtn');
+                dlDec.href = decryptCanvas.toDataURL('image/png');
+                dlDec.classList.remove('d-none');
 
                 const endTime = performance.now();
                 const duration = ((endTime - startTime) / 1000).toFixed(2);
 
-                // Potong processedRgb tepat ke originalLength sebelum pemetaan canvas, histogram, dan komparasi
-                const finalRgb = processedRgb.slice(0, originalLength);
-
-                let idx = 0;
-                for (let i = 0; i < data.length; i += 4) {
-                    data[i]     = finalRgb[idx++]; // R
-                    data[i + 1] = finalRgb[idx++]; // G
-                    data[i + 2] = finalRgb[idx++]; // B
-                    data[i + 3] = 255;
+                document.getElementById('processTime').textContent = `Waktu: ${duration}s`;
+                const procStatus = document.getElementById('processStatus');
+                if (procStatus) {
+                    procStatus.textContent = 'Sukses (Lossless)';
+                    procStatus.className = 'badge bg-success font-monospace';
+                }
+                const resBadge = document.getElementById('resultBadge');
+                if (resBadge) {
+                    resBadge.textContent = 'Enkripsi & Dekripsi Selesai';
+                    resBadge.className = 'badge bg-success font-monospace';
+                    resBadge.classList.remove('d-none');
                 }
 
-                const resCanvas = document.getElementById('resultCanvas');
-                resCanvas.width = canvas.width;
-                resCanvas.height = canvas.height;
-                const resCtx = resCanvas.getContext('2d');
-                resCtx.putImageData(imgData, 0, 0);
+                // Simpan State
+                storedOriginalRgb = new Uint8Array(rgbBytes.slice(0, originalLength));
+                storedCipherRgb = cipherRgb;
+                storedDecryptedRgb = decRgb;
+                storedImageWidth = width;
+                storedImageHeight = height;
 
-                resCanvas.classList.remove('d-none');
-                document.getElementById('resultPlaceholder').classList.add('d-none');
-                document.getElementById('processTime').textContent = `Waktu Eksekusi: ${duration}s`;
+                // Tampilkan semua matriks (angka saja, tanpa grafik/tab)
+                displayAllMeasurements(storedOriginalRgb, storedCipherRgb, storedDecryptedRgb, width, height, duration);
 
-                lastProcessedMode = mode;
-                lastResultData = {
-                    rgbBytes: finalRgb,
-                    width: canvas.width,
-                    height: canvas.height,
-                    mode: mode
-                };
-
-                if (!initialOriginalRgb && mode === 'encrypt') {
-                    initialOriginalRgb = new Uint8Array(rgbBytes.slice(0, originalLength));
-                }
-
-                updateResultActions(mode);
-                displayMeasurements(mode, rgbBytes.slice(0, originalLength), finalRgb, canvas.width, canvas.height);
-
-                // Render Histogram Hasil & Analisis Keseragaman Chi-Square
-                currentResultHistogramData = computeHistogram(finalRgb);
+                // Render Histogram Hasil & Analisis Keseragaman Chi-Square (dari ciphertext)
+                currentResultHistogramData = computeHistogram(cipherRgb);
                 document.getElementById('resultHistCanvas').classList.remove('d-none');
                 document.getElementById('resultHistPlaceholder').classList.add('d-none');
                 drawHistogram('resultHistCanvas', currentResultHistogramData, currentResultChannel);
-                updateHistogramAnalysis(mode, currentResultHistogramData, finalRgb.length);
+                updateHistogramAnalysis('encrypt', currentResultHistogramData, cipherRgb.length);
 
-                const downloadBtn = document.getElementById('downloadBtn');
-                downloadBtn.href = resCanvas.toDataURL('image/png');
-                downloadBtn.download = `${mode}_AES256_CBC_result.png`;
-                downloadBtn.classList.remove('d-none');
-
-                setTimeout(() => progressContainer.classList.add('d-none'), 1000);
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+                setTimeout(() => progressContainer.classList.add('d-none'), 600);
             } finally {
                 setButtonsDisabled(false);
             }
         }
 
-        async function reverseProcess() {
-            if (!lastProcessedMode || !lastResultData) return;
+        // ==========================================
+        // METRIK KRIPTOGRAFI: CC, NCC, SSIM
+        // ==========================================
+        function calculateCC(imgA, imgB) {
+            const N = Math.min(imgA.length, imgB.length);
+            if (N === 0) return 0;
 
-            const targetMode = lastProcessedMode === 'encrypt' ? 'decrypt' : 'encrypt';
-            const currentRgb = lastResultData.rgbBytes;
-            const resCanvas = document.getElementById('resultCanvas');
-            const dataUrl = resCanvas.toDataURL('image/png');
-
-            // Pindahkan hasil saat ini ke panel input
-            const origPreview = document.getElementById('originalPreview');
-            origPreview.src = dataUrl;
-            origPreview.classList.remove('d-none');
-            document.getElementById('originalPlaceholder').classList.add('d-none');
-
-            const inputTitle = document.getElementById('inputTitle');
-            if (inputTitle) {
-                inputTitle.textContent = `Gambar Input (${lastProcessedMode === 'encrypt' ? 'Ciphertext' : 'Plaintext'})`;
+            let sumA = 0, sumB = 0;
+            for (let i = 0; i < N; i++) {
+                sumA += imgA[i];
+                sumB += imgB[i];
             }
-            const inputBadge = document.getElementById('inputBadge');
-            if (inputBadge) {
-                inputBadge.textContent = lastProcessedMode === 'encrypt' ? 'Terenkripsi' : 'Terdekripsi';
-                inputBadge.className = `badge ${lastProcessedMode === 'encrypt' ? 'bg-danger' : 'bg-success'}`;
-                inputBadge.classList.remove('d-none');
+            const meanA = sumA / N;
+            const meanB = sumB / N;
+
+            let num = 0, denA = 0, denB = 0;
+            for (let i = 0; i < N; i++) {
+                const da = imgA[i] - meanA;
+                const db = imgB[i] - meanB;
+                num += da * db;
+                denA += da * da;
+                denB += db * db;
             }
-
-            document.getElementById('originalDetails').innerHTML = `
-                <span>Dimensi: ${lastResultData.width}x${lastResultData.height} px</span>
-                <span>Sumber: Hasil ${lastProcessedMode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'}</span>
-            `;
-
-            // Hitung ulang histogram input dari currentRgb lalu gambarkan
-            currentInputHistogramData = computeHistogram(currentRgb);
-            document.getElementById('inputHistCanvas').classList.remove('d-none');
-            document.getElementById('inputHistPlaceholder').classList.add('d-none');
-            drawHistogram('inputHistCanvas', currentInputHistogramData, currentInputChannel);
-
-            // Buat Image untuk loadedImage
-            const img = new Image();
-            img.src = dataUrl;
-            loadedImage = img;
-
-            // Jalankan proses kebalikannya langsung
-            await processImage(targetMode, currentRgb);
+            const den = Math.sqrt(denA * denB);
+            return den === 0 ? 0 : num / den;
         }
 
-        function useResultAsInput() {
-            if (!lastResultData) return;
-            const resCanvas = document.getElementById('resultCanvas');
-            const dataUrl = resCanvas.toDataURL('image/png');
-            const currentRgb = lastResultData.rgbBytes;
+        function calculateNCC(imgA, imgB) {
+            const N = Math.min(imgA.length, imgB.length);
+            if (N === 0) return 0;
 
-            const origPreview = document.getElementById('originalPreview');
-            origPreview.src = dataUrl;
-            origPreview.classList.remove('d-none');
-            document.getElementById('originalPlaceholder').classList.add('d-none');
-
-            const inputTitle = document.getElementById('inputTitle');
-            if (inputTitle) {
-                inputTitle.textContent = `Gambar Input (${lastProcessedMode === 'encrypt' ? 'Ciphertext' : 'Plaintext'})`;
+            let sumAB = 0, sumA2 = 0, sumB2 = 0;
+            for (let i = 0; i < N; i++) {
+                const a = imgA[i];
+                const b = imgB[i];
+                sumAB += a * b;
+                sumA2 += a * a;
+                sumB2 += b * b;
             }
-            const inputBadge = document.getElementById('inputBadge');
-            if (inputBadge) {
-                inputBadge.textContent = lastProcessedMode === 'encrypt' ? 'Terenkripsi' : 'Terdekripsi';
-                inputBadge.className = `badge ${lastProcessedMode === 'encrypt' ? 'bg-danger' : 'bg-success'}`;
-                inputBadge.classList.remove('d-none');
+            const den = Math.sqrt(sumA2 * sumB2);
+            return den === 0 ? 0 : sumAB / den;
+        }
+
+        function calculateSSIM(imgA, imgB, width, height) {
+            const totalPixels = width * height;
+            if (totalPixels <= 0) return 0;
+
+            const N = totalPixels;
+            const lumA = new Float32Array(N);
+            const lumB = new Float32Array(N);
+
+            for (let i = 0; i < N; i++) {
+                const idx = i * 3;
+                if (idx + 2 < imgA.length && idx + 2 < imgB.length) {
+                    lumA[i] = 0.299 * imgA[idx] + 0.587 * imgA[idx + 1] + 0.114 * imgA[idx + 2];
+                    lumB[i] = 0.299 * imgB[idx] + 0.587 * imgB[idx + 1] + 0.114 * imgB[idx + 2];
+                }
             }
 
-            document.getElementById('originalDetails').innerHTML = `
-                <span>Dimensi: ${lastResultData.width}x${lastResultData.height} px</span>
-                <span>Sumber: Hasil ${lastProcessedMode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'}</span>
-            `;
+            const K1 = 0.01;
+            const K2 = 0.03;
+            const L = 255;
+            const C1 = (K1 * L) * (K1 * L); // 6.5025
+            const C2 = (K2 * L) * (K2 * L); // 58.5225
 
-            const img = new Image();
-            img.onload = function() {
-                loadedImage = img;
-                document.getElementById('btnEncrypt').disabled = false;
-                document.getElementById('btnDecrypt').disabled = false;
-            };
-            img.src = dataUrl;
+            const blockSize = 8;
+            const blocksX = Math.floor(width / blockSize);
+            const blocksY = Math.floor(height / blockSize);
 
-            // Reset panel measurement
-            document.getElementById('measurePlaceholder').classList.remove('d-none');
-            document.getElementById('measureContent').classList.add('d-none');
-            const metricBadge = document.getElementById('metricBadge');
-            if (metricBadge) metricBadge.classList.add('d-none');
-            document.getElementById('metricStatusText').textContent = '-';
-            document.getElementById('metricCalcTime').textContent = 'Hitung: -';
+            if (blocksX === 0 || blocksY === 0) {
+                let sumA = 0, sumB = 0;
+                for (let i = 0; i < N; i++) {
+                    sumA += lumA[i];
+                    sumB += lumB[i];
+                }
+                const muA = sumA / N;
+                const muB = sumB / N;
 
-            // Hitung ulang histogram input dari data gambar saat ini
-            currentInputHistogramData = computeHistogram(currentRgb);
-            document.getElementById('inputHistCanvas').classList.remove('d-none');
-            document.getElementById('inputHistPlaceholder').classList.add('d-none');
-            drawHistogram('inputHistCanvas', currentInputHistogramData, currentInputChannel);
+                let varA = 0, varB = 0, covAB = 0;
+                for (let i = 0; i < N; i++) {
+                    const da = lumA[i] - muA;
+                    const db = lumB[i] - muB;
+                    varA += da * da;
+                    varB += db * db;
+                    covAB += da * db;
+                }
+                varA /= (N - 1 || 1);
+                varB /= (N - 1 || 1);
+                covAB /= (N - 1 || 1);
 
-            currentResultHistogramData = null;
-            document.getElementById('resultHistCanvas').classList.add('d-none');
-            document.getElementById('resultHistPlaceholder').classList.remove('d-none');
-            document.getElementById('resultHistDistText').textContent = '-';
-            document.getElementById('histAnalysisPlaceholder').classList.remove('d-none');
-            document.getElementById('histAnalysisContent').classList.add('d-none');
-            const histTestBadge = document.getElementById('histTestBadge');
-            if (histTestBadge) histTestBadge.classList.add('d-none');
-            document.getElementById('histAnalysisStatus').textContent = '-';
+                const num = (2 * muA * muB + C1) * (2 * covAB + C2);
+                const den = (muA * muA + muB * muB + C1) * (varA + varB + C2);
+                return den === 0 ? 0 : Math.max(0, Math.min(1, num / den));
+            }
+
+            let ssimTotal = 0;
+            let blockCount = 0;
+            const blockN = blockSize * blockSize;
+
+            for (let by = 0; by < blocksY; by++) {
+                for (let bx = 0; bx < blocksX; bx++) {
+                    const startX = bx * blockSize;
+                    const startY = by * blockSize;
+
+                    let sumA = 0, sumB = 0;
+                    for (let y = 0; y < blockSize; y++) {
+                        const rowOffset = (startY + y) * width;
+                        for (let x = 0; x < blockSize; x++) {
+                            const idx = rowOffset + (startX + x);
+                            sumA += lumA[idx];
+                            sumB += lumB[idx];
+                        }
+                    }
+                    const muA = sumA / blockN;
+                    const muB = sumB / blockN;
+
+                    let varA = 0, varB = 0, covAB = 0;
+                    for (let y = 0; y < blockSize; y++) {
+                        const rowOffset = (startY + y) * width;
+                        for (let x = 0; x < blockSize; x++) {
+                            const idx = rowOffset + (startX + x);
+                            const da = lumA[idx] - muA;
+                            const db = lumB[idx] - muB;
+                            varA += da * da;
+                            varB += db * db;
+                            covAB += da * db;
+                        }
+                    }
+                    varA /= (blockN - 1);
+                    varB /= (blockN - 1);
+                    covAB /= (blockN - 1);
+
+                    const num = (2 * muA * muB + C1) * (2 * covAB + C2);
+                    const den = (muA * muA + muB * muB + C1) * (varA + varB + C2);
+                    const ssimBlock = den === 0 ? 0 : num / den;
+
+                    ssimTotal += ssimBlock;
+                    blockCount++;
+                }
+            }
+
+            const meanSSIM = blockCount === 0 ? 0 : ssimTotal / blockCount;
+            return Math.max(0, Math.min(1, meanSSIM));
         }
 
         // ==========================================
-        // PENGUKURAN METRIK KRIPTOGRAFI GAMBAR
+        // TAMPILKAN SEMUA MATRIKS (ANGKA SAJA, TANPA GRAFIK)
         // ==========================================
-        function calculateMeasurements(inputRgb, resultRgb, width, height, compareRgb = null) {
-            const startTime = performance.now();
+        function displayAllMeasurements(origRgb, cipherRgb, decRgb, width, height, duration) {
+            const mStartTime = performance.now();
 
-            // 1. Shannon Entropy (Keacakan byte gambar hasil)
+            // 1. Matriks Kriptografi Dosen (CC, NCC, SSIM Plain vs Cipher, SSIM Dekripsi)
+            const cc = calculateCC(origRgb, cipherRgb);
+            const ncc = calculateNCC(origRgb, cipherRgb);
+            const ssim = calculateSSIM(origRgb, cipherRgb, width, height);
+            const ssimDec = calculateSSIM(origRgb, decRgb, width, height);
+
+            document.getElementById('iemCC').textContent = (cc >= 0 ? '+' : '') + cc.toFixed(4);
+            document.getElementById('iemNCC').textContent = ncc.toFixed(4);
+            document.getElementById('iemSSIM').textContent = ssim.toFixed(4);
+            document.getElementById('iemSSIMDec').textContent = ssimDec.toFixed(4);
+            const iemBadge = document.getElementById('iemBadge');
+            if (iemBadge) {
+                iemBadge.textContent = '100% Lossless';
+                iemBadge.className = 'badge bg-success font-monospace py-0 px-1';
+            }
+
+            // 2. Shannon Entropy (Ciphertext)
             const counts = new Uint32Array(256);
-            for (let i = 0; i < resultRgb.length; i++) {
-                counts[resultRgb[i]]++;
-            }
+            for (let i = 0; i < cipherRgb.length; i++) counts[cipherRgb[i]]++;
             let entropy = 0;
-            const totalBytes = resultRgb.length;
+            const totalBytes = cipherRgb.length;
             for (let i = 0; i < 256; i++) {
                 if (counts[i] > 0) {
                     const p = counts[i] / totalBytes;
                     entropy -= p * Math.log2(p);
                 }
             }
-
-            // Target referensi perbandingan: compareRgb (misal gambar asli awal saat dekripsi) atau inputRgb
-            const refRgb = compareRgb || inputRgb;
-            const refN = Math.min(refRgb.length, resultRgb.length);
-
-            // 2. MSE (Mean Squared Error) & PSNR
-            let sumSqErr = 0;
-            for (let i = 0; i < refN; i++) {
-                const diff = refRgb[i] - resultRgb[i];
-                sumSqErr += diff * diff;
+            document.getElementById('metricEntropyVal').textContent = entropy.toFixed(4) + ' bit';
+            const entBadge = document.getElementById('metricEntropyBadge');
+            if (entBadge) {
+                entBadge.textContent = entropy > 7.9 ? 'Acak Tinggi' : 'Terstruktur';
+                entBadge.className = entropy > 7.9 ? 'badge bg-success font-monospace py-0 px-1' : 'badge bg-secondary font-monospace py-0 px-1';
             }
-            const mse = sumSqErr / refN;
-            const psnr = mse === 0 ? Infinity : 10 * Math.log10((255 * 255) / mse);
 
-            // 3. Kesamaan Piksel & Persentase Piksel Berbeda
+            // 3. MSE (Original vs Cipher)
+            let sumSqCipher = 0;
+            for (let i = 0; i < origRgb.length; i++) {
+                const diff = origRgb[i] - cipherRgb[i];
+                sumSqCipher += diff * diff;
+            }
+            const mseCipher = sumSqCipher / origRgb.length;
+            document.getElementById('metricMSEVal').textContent = mseCipher.toFixed(2);
+
+            // 4. MSE & PSNR (Original vs Decrypted)
+            let sumSqDec = 0;
+            for (let i = 0; i < origRgb.length; i++) {
+                const diff = origRgb[i] - decRgb[i];
+                sumSqDec += diff * diff;
+            }
+            const mseDec = sumSqDec / origRgb.length;
+            const psnrText = mseDec === 0 ? '∞ dB' : (10 * Math.log10((255 * 255) / mseDec)).toFixed(2) + ' dB';
+            document.getElementById('metricPSNRVal').textContent = psnrText;
+            const psnrBadge = document.getElementById('metricPSNRValBadge');
+            if (psnrBadge) {
+                psnrBadge.textContent = mseDec === 0 ? 'Lossless' : 'Lossy';
+                psnrBadge.className = mseDec === 0 ? 'badge bg-success font-monospace py-0 px-1' : 'badge bg-warning font-monospace py-0 px-1';
+            }
+
+            // 5. Pixel Equality (Original vs Decrypted)
             const totalPixels = width * height;
             let equalPixels = 0;
             for (let p = 0; p < totalPixels; p++) {
                 const idx = p * 3;
-                if (idx + 2 < refN) {
-                    if (refRgb[idx] === resultRgb[idx] &&
-                        refRgb[idx + 1] === resultRgb[idx + 1] &&
-                        refRgb[idx + 2] === resultRgb[idx + 2]) {
-                        equalPixels++;
-                    }
+                if (origRgb[idx] === decRgb[idx] &&
+                    origRgb[idx + 1] === decRgb[idx + 1] &&
+                    origRgb[idx + 2] === decRgb[idx + 2]) {
+                    equalPixels++;
                 }
             }
-            const pixelEquality = (equalPixels / totalPixels) * 100;
-            const diffPixelsPct = ((totalPixels - equalPixels) / totalPixels) * 100;
-
-            // 4. Korelasi Referensi vs Hasil (Plain vs Cipher / Hasil vs Asli)
-            let sumX = 0, sumY = 0;
-            for (let i = 0; i < refN; i++) {
-                sumX += refRgb[i];
-                sumY += resultRgb[i];
+            const equalityPct = (equalPixels / totalPixels) * 100;
+            const diffPixels = totalPixels - equalPixels;
+            document.getElementById('metricEqualityVal').textContent = equalityPct.toFixed(2) + '%';
+            document.getElementById('metricDiffVal').textContent = `Piksel Beda: ${diffPixels} (${((diffPixels / totalPixels) * 100).toFixed(2)}%)`;
+            const eqBadge = document.getElementById('metricEqualityBadge');
+            if (eqBadge) {
+                eqBadge.textContent = equalityPct >= 99.99 ? '100% Identik' : 'Ada Galat';
+                eqBadge.className = equalityPct >= 99.99 ? 'badge bg-success font-monospace py-0 px-1' : 'badge bg-danger font-monospace py-0 px-1';
             }
-            const meanX = sumX / refN;
-            const meanY = sumY / refN;
 
-            let num = 0, denX = 0, denY = 0;
-            for (let i = 0; i < refN; i++) {
-                const dx = refRgb[i] - meanX;
-                const dy = resultRgb[i] - meanY;
-                num += dx * dy;
-                denX += dx * dx;
-                denY += dy * dy;
-            }
-            const correlation = (denX === 0 || denY === 0) ? 0 : num / Math.sqrt(denX * denY);
-
-            // 5. Korelasi Adjacent (Horizontal, Vertikal, Diagonal) untuk Channel R, G, B
+            // 6. Adjacent Correlation (Ciphertext)
             const NH = (width - 1) * height;
             const NV = width * (height - 1);
             const ND = (width - 1) * (height - 1);
@@ -1258,8 +1353,8 @@
                     if (hasRight) {
                         const right = (y * width + (x + 1)) * 3;
                         for (let c = 0; c < 3; c++) {
-                            const u = resultRgb[curr + c];
-                            const v = resultRgb[right + c];
+                            const u = cipherRgb[curr + c];
+                            const v = cipherRgb[right + c];
                             sX_H[c] += u; sY_H[c] += v;
                             sX2_H[c] += u * u; sY2_H[c] += v * v;
                             sXY_H[c] += u * v;
@@ -1269,8 +1364,8 @@
                     if (hasDown) {
                         const down = ((y + 1) * width + x) * 3;
                         for (let c = 0; c < 3; c++) {
-                            const u = resultRgb[curr + c];
-                            const v = resultRgb[down + c];
+                            const u = cipherRgb[curr + c];
+                            const v = cipherRgb[down + c];
                             sX_V[c] += u; sY_V[c] += v;
                             sX2_V[c] += u * u; sY2_V[c] += v * v;
                             sXY_V[c] += u * v;
@@ -1280,8 +1375,8 @@
                     if (hasRight && hasDown) {
                         const diag = ((y + 1) * width + (x + 1)) * 3;
                         for (let c = 0; c < 3; c++) {
-                            const u = resultRgb[curr + c];
-                            const v = resultRgb[diag + c];
+                            const u = cipherRgb[curr + c];
+                            const v = cipherRgb[diag + c];
                             sX_D[c] += u; sY_D[c] += v;
                             sX2_D[c] += u * u; sY2_D[c] += v * v;
                             sXY_D[c] += u * v;
@@ -1290,139 +1385,94 @@
                 }
             }
 
-            function calcPearson(N, sX, sY, sX2, sY2, sXY) {
+            function calcP(N, sX, sY, sX2, sY2, sXY) {
                 if (N <= 0) return 0;
-                const numerator = N * sXY - sX * sY;
-                const denominator = Math.sqrt((N * sX2 - sX * sX) * (N * sY2 - sY * sY));
-                return denominator === 0 ? 0 : numerator / denominator;
+                const num = N * sXY - sX * sY;
+                const den = Math.sqrt((N * sX2 - sX * sX) * (N * sY2 - sY * sY));
+                return den === 0 ? 0 : num / den;
             }
 
-            const hR = calcPearson(NH, sX_H[0], sY_H[0], sX2_H[0], sY2_H[0], sXY_H[0]);
-            const hG = calcPearson(NH, sX_H[1], sY_H[1], sX2_H[1], sY2_H[1], sXY_H[1]);
-            const hB = calcPearson(NH, sX_H[2], sY_H[2], sX2_H[2], sY2_H[2], sXY_H[2]);
-            const hAvg = (hR + hG + hB) / 3;
+            const hAvg = (calcP(NH, sX_H[0], sY_H[0], sX2_H[0], sY2_H[0], sXY_H[0]) +
+                          calcP(NH, sX_H[1], sY_H[1], sX2_H[1], sY2_H[1], sXY_H[1]) +
+                          calcP(NH, sX_H[2], sY_H[2], sX2_H[2], sY2_H[2], sXY_H[2])) / 3;
 
-            const vR = calcPearson(NV, sX_V[0], sY_V[0], sX2_V[0], sY2_V[0], sXY_V[0]);
-            const vG = calcPearson(NV, sX_V[1], sY_V[1], sX2_V[1], sY2_V[1], sXY_V[1]);
-            const vB = calcPearson(NV, sX_V[2], sY_V[2], sX2_V[2], sY2_V[2], sXY_V[2]);
-            const vAvg = (vR + vG + vB) / 3;
+            const vAvg = (calcP(NV, sX_V[0], sY_V[0], sX2_V[0], sY2_V[0], sXY_V[0]) +
+                          calcP(NV, sX_V[1], sY_V[1], sX2_V[1], sY2_V[1], sXY_V[1]) +
+                          calcP(NV, sX_V[2], sY_V[2], sX2_V[2], sY2_V[2], sXY_V[2])) / 3;
 
-            const dR = calcPearson(ND, sX_D[0], sY_D[0], sX2_D[0], sY2_D[0], sXY_D[0]);
-            const dG = calcPearson(ND, sX_D[1], sY_D[1], sX2_D[1], sY2_D[1], sXY_D[1]);
-            const dB = calcPearson(ND, sX_D[2], sY_D[2], sX2_D[2], sY2_D[2], sXY_D[2]);
-            const dAvg = (dR + dG + dB) / 3;
+            const dAvg = (calcP(ND, sX_D[0], sY_D[0], sX2_D[0], sY2_D[0], sXY_D[0]) +
+                          calcP(ND, sX_D[1], sY_D[1], sX2_D[1], sY2_D[1], sXY_D[1]) +
+                          calcP(ND, sX_D[2], sY_D[2], sX2_D[2], sY2_D[2], sXY_D[2])) / 3;
 
-            const calcTime = (performance.now() - startTime).toFixed(1);
+            const totalAvg = (hAvg + vAvg + dAvg) / 3;
 
-            return {
-                entropy,
-                mse,
-                psnr,
-                pixelEquality,
-                diffPixelsPct,
-                correlation,
-                adjacent: {
-                    h: { r: hR, g: hG, b: hB, avg: hAvg },
-                    v: { r: vR, g: vG, b: vB, avg: vAvg },
-                    d: { r: dR, g: dG, b: dB, avg: dAvg },
-                    totalAvg: (hAvg + vAvg + dAvg) / 3
-                },
-                calcTime
-            };
+            document.getElementById('metricCorrAdjH').textContent = hAvg.toFixed(4);
+            document.getElementById('metricCorrAdjV').textContent = vAvg.toFixed(4);
+            document.getElementById('metricCorrAdjD').textContent = dAvg.toFixed(4);
+            document.getElementById('metricCorrAdjTotal').textContent = 'Rerata: ' + totalAvg.toFixed(4);
+
+            const mCalcTime = (performance.now() - mStartTime).toFixed(1);
+            document.getElementById('metricStatusText').textContent = 'Identik (Restorasi Sempurna)';
+            document.getElementById('metricCalcTime').textContent = `Hitung: ${mCalcTime} ms`;
+            const mBadge = document.getElementById('metricBadge');
+            if (mBadge) {
+                mBadge.textContent = 'Lengkap (Lossless)';
+                mBadge.className = 'badge bg-success font-monospace';
+            }
         }
 
-        function displayMeasurements(mode, inputRgb, resultRgb, width, height) {
-            let compareRgb = null;
-            let compareLabel = "Input vs Hasil";
+        // ==========================================
+        // RESET SEMUA MATRIKS KE STANDBY
+        // ==========================================
+        function resetAllMeasurements() {
+            storedOriginalRgb = null;
+            storedCipherRgb = null;
+            storedDecryptedRgb = null;
 
-            if (mode === 'decrypt' && initialOriginalRgb && initialOriginalRgb.length === resultRgb.length) {
-                compareRgb = initialOriginalRgb;
-                compareLabel = "Hasil Dekripsi vs Gambar Asli";
+            document.getElementById('iemCC').textContent = '—';
+            document.getElementById('iemNCC').textContent = '—';
+            document.getElementById('iemSSIM').textContent = '—';
+            document.getElementById('iemSSIMDec').textContent = '—';
+            const iBadge = document.getElementById('iemBadge');
+            if (iBadge) {
+                iBadge.textContent = 'Standby';
+                iBadge.className = 'badge bg-light text-secondary border font-monospace py-0 px-1';
             }
 
-            const m = calculateMeasurements(inputRgb, resultRgb, width, height, compareRgb);
-
-            document.getElementById('measurePlaceholder').classList.add('d-none');
-            document.getElementById('measureContent').classList.remove('d-none');
-
-            const metricBadge = document.getElementById('metricBadge');
-            if (metricBadge) {
-                metricBadge.classList.remove('d-none');
-                metricBadge.textContent = mode === 'encrypt' ? 'Analisis Enkripsi' : 'Analisis Dekripsi';
-                metricBadge.className = mode === 'encrypt' ? 'badge bg-danger' : 'badge bg-success';
+            document.getElementById('metricEntropyVal').textContent = '—';
+            const entBadge = document.getElementById('metricEntropyBadge');
+            if (entBadge) {
+                entBadge.textContent = 'Skala 0-8';
+                entBadge.className = 'badge bg-light text-secondary border font-monospace py-0 px-1';
             }
 
-            // 1. Entropy
-            document.getElementById('metricEntropyVal').textContent = m.entropy.toFixed(4);
-            const entropyPct = Math.min(100, Math.max(0, (m.entropy / 8) * 100));
-            const entropyBar = document.getElementById('metricEntropyBar');
-            entropyBar.style.width = `${entropyPct}%`;
-            const entropyBadge = document.getElementById('metricEntropyBadge');
-            if (m.entropy > 7.9) {
-                entropyBar.className = 'progress-bar bg-success';
-                entropyBadge.className = 'badge bg-success-subtle text-success font-monospace';
-                entropyBadge.textContent = 'Acak Tinggi';
-            } else {
-                entropyBar.className = 'progress-bar bg-primary';
-                entropyBadge.className = 'badge bg-primary-subtle text-primary font-monospace';
-                entropyBadge.textContent = 'Terstruktur';
+            document.getElementById('metricPSNRVal').textContent = '—';
+            const psnrBadge = document.getElementById('metricPSNRValBadge');
+            if (psnrBadge) {
+                psnrBadge.textContent = 'dB';
+                psnrBadge.className = 'badge bg-light text-secondary border font-monospace py-0 px-1';
             }
 
-            // 2. Correlation
-            const corrRefTitle = document.getElementById('metricCorrRefTitle');
-            if (corrRefTitle) {
-                corrRefTitle.textContent = (mode === 'decrypt' && compareRgb) ? 'Hasil vs Asli: ' : 'Plain vs Cipher: ';
-            }
-            document.getElementById('metricCorrPlainCipher').textContent = m.correlation.toFixed(4);
-
-            // Adjacent Correlation H, V, D & channel breakdown
-            document.getElementById('metricCorrAdjH').textContent = m.adjacent.h.avg.toFixed(4);
-            document.getElementById('metricCorrAdjV').textContent = m.adjacent.v.avg.toFixed(4);
-            document.getElementById('metricCorrAdjD').textContent = m.adjacent.d.avg.toFixed(4);
-            document.getElementById('metricCorrAdjTotal').textContent = `Rerata: ${m.adjacent.totalAvg.toFixed(4)}`;
-
-            const breakdownEl = document.getElementById('metricCorrChannelBreakdown');
-            if (breakdownEl) {
-                breakdownEl.textContent = `R/G/B: H(${m.adjacent.h.r.toFixed(2)}/${m.adjacent.h.g.toFixed(2)}/${m.adjacent.h.b.toFixed(2)}) V(${m.adjacent.v.r.toFixed(2)}/${m.adjacent.v.g.toFixed(2)}/${m.adjacent.v.b.toFixed(2)}) D(${m.adjacent.d.r.toFixed(2)}/${m.adjacent.d.g.toFixed(2)}/${m.adjacent.d.b.toFixed(2)})`;
-                breakdownEl.title = `Horizontal: R=${m.adjacent.h.r.toFixed(4)}, G=${m.adjacent.h.g.toFixed(4)}, B=${m.adjacent.h.b.toFixed(4)}\nVertikal: R=${m.adjacent.v.r.toFixed(4)}, G=${m.adjacent.v.g.toFixed(4)}, B=${m.adjacent.v.b.toFixed(4)}\nDiagonal: R=${m.adjacent.d.r.toFixed(4)}, G=${m.adjacent.d.g.toFixed(4)}, B=${m.adjacent.d.b.toFixed(4)}`;
+            document.getElementById('metricMSEVal').textContent = '—';
+            document.getElementById('metricEqualityVal').textContent = '—';
+            document.getElementById('metricDiffVal').textContent = 'Piksel Berbeda: —';
+            const eqBadge = document.getElementById('metricEqualityBadge');
+            if (eqBadge) {
+                eqBadge.textContent = '—';
+                eqBadge.className = 'badge bg-light text-secondary border font-monospace py-0 px-1';
             }
 
-            // 3. MSE & PSNR
-            document.getElementById('metricMSEVal').textContent = m.mse.toFixed(2);
-            const psnrText = m.psnr === Infinity ? 'Lossless (∞ dB)' : `${m.psnr.toFixed(2)} dB`;
-            document.getElementById('metricPSNRVal').textContent = `PSNR: ${psnrText}`;
-
-            // 4. Pixel Equality & Difference
-            document.getElementById('metricEqualityVal').textContent = `${m.pixelEquality.toFixed(2)}%`;
-            document.getElementById('metricDiffVal').textContent = `Piksel Berbeda: ${m.diffPixelsPct.toFixed(2)}%`;
-            document.getElementById('metricRefLabel').textContent = `Perbandingan: ${compareLabel}`;
-
-            const equalityBadge = document.getElementById('metricEqualityBadge');
-            if (m.pixelEquality >= 99.99) {
-                equalityBadge.textContent = '100% Identik';
-                equalityBadge.className = 'badge bg-success';
-            } else if (m.pixelEquality < 1) {
-                equalityBadge.textContent = 'Terkripto';
-                equalityBadge.className = 'badge bg-danger';
-            } else {
-                equalityBadge.textContent = `${m.pixelEquality.toFixed(1)}% Cocok`;
-                equalityBadge.className = 'badge bg-warning text-dark';
+            document.getElementById('metricCorrAdjH').textContent = '—';
+            document.getElementById('metricCorrAdjV').textContent = '—';
+            document.getElementById('metricCorrAdjD').textContent = '—';
+            document.getElementById('metricCorrAdjTotal').textContent = 'Rerata: —';
+            document.getElementById('metricStatusText').textContent = '-';
+            document.getElementById('metricCalcTime').textContent = 'Hitung: -';
+            const mBadge = document.getElementById('metricBadge');
+            if (mBadge) {
+                mBadge.textContent = 'Standby';
+                mBadge.className = 'badge bg-secondary-subtle text-secondary font-monospace';
             }
-
-            // Status evaluasi metrik berdasarkan data (bukan sekadar mode)
-            const metricStatusEl = document.getElementById('metricStatusText');
-            if (metricStatusEl) {
-                if (m.pixelEquality >= 99.99) {
-                    metricStatusEl.textContent = 'Identik (Restorasi Sempurna)';
-                } else if (m.entropy >= 7.9 && m.pixelEquality < 10) {
-                    metricStatusEl.textContent = 'Terenkripsi Kuat';
-                } else if (m.pixelEquality > 50) {
-                    metricStatusEl.textContent = 'Serupa Sebagian';
-                } else {
-                    metricStatusEl.textContent = 'Citra Terbuka / Natural';
-                }
-            }
-            document.getElementById('metricCalcTime').textContent = `Hitung: ${m.calcTime} ms`;
         }
 
         // ==========================================
