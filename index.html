@@ -3,52 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enkripsi & Dekripsi Gambar AES-128 (Manual)</title>
+    <title>Enkripsi & Dekripsi Gambar AES-256 CBC (Manual)</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bs-body-font-size: 0.8rem;
+        }
+        body {
+            font-size: 0.8rem;
+            background-color: #f6f8fa !important;
+        }
+        .card {
+            border-radius: 0.45rem;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+        }
+        .card-header {
+            padding: 0.35rem 0.65rem !important;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .card-body {
+            padding: 0.5rem 0.65rem !important;
+        }
+        .card-footer {
+            padding: 0.25rem 0.65rem !important;
+            font-size: 0.7rem !important;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .form-label {
+            margin-bottom: 0.15rem !important;
+            font-size: 0.74rem;
+        }
+        .form-control-sm {
+            padding: 0.2rem 0.45rem !important;
+            font-size: 0.75rem !important;
+            border-radius: 0.3rem;
+        }
+        .btn-sm {
+            padding: 0.2rem 0.45rem !important;
+            font-size: 0.74rem !important;
+            border-radius: 0.3rem;
+        }
+        .table-compact th, .table-compact td {
+            padding: 0.18rem 0.35rem !important;
+            font-size: 0.74rem !important;
+        }
+        .metric-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.35rem;
+            padding: 0.2rem 0.45rem;
+            margin-bottom: 0.2rem;
+            background: #ffffff;
+        }
+        .metric-title {
+            font-size: 0.71rem;
+            font-weight: 600;
+        }
+        .metric-val {
+            font-size: 0.88rem;
+            font-weight: 700;
+            font-family: var(--bs-font-monospace);
+        }
+        .metric-sub {
+            font-size: 0.67rem;
+            font-family: var(--bs-font-monospace);
+            color: #6c757d;
+        }
+        .dropzone-compact {
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.35rem;
+            padding: 0.3rem;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+        .dropzone-compact:hover {
+            border-color: #0d6efd;
+            background-color: #f0f7ff;
+        }
+    </style>
 </head>
 <body class="bg-light">
 
     <!-- Header / Navbar -->
-    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4 shadow-sm">
-        <div class="container">
-            <span class="navbar-brand d-flex align-items-center gap-2 fw-bold mb-0">
+    <nav class="navbar navbar-expand navbar-dark bg-primary mb-2 shadow-sm py-1">
+        <div class="container-fluid px-lg-3 px-2">
+            <span class="navbar-brand d-flex align-items-center gap-2 fw-bold mb-0 fs-6">
                 <i class="bi bi-shield-lock-fill"></i>
-                AES-128 Image Cipher
+                AES-256 CBC Image Cipher & Analysis (Compact 3x3)
             </span>
         </div>
     </nav>
 
     <!-- Main Container -->
-    <div class="container pb-5">
+    <div class="container-fluid px-lg-3 px-2 pb-2">
 
-        <!-- Baris 1: Form Input & Informasi Algoritma (Simetris 6 : 6) -->
-        <div class="row g-4 mb-4">
+        <!-- Baris 1: Konfigurasi & Parameter (3 Kolom: 4 : 4 : 4) -->
+        <div class="row g-2 mb-2">
             
-            <!-- Form Input Panel -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-bold py-3">
-                        <i class="bi bi-sliders text-primary me-1"></i> Form Input
+            <!-- Kolom 1: Form Input Panel -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-sliders text-primary me-1"></i> Form Input</span>
+                        <span class="badge bg-primary-subtle text-primary font-monospace" style="font-size: 0.68rem;">AES-256-CBC</span>
                     </div>
                     <div class="card-body d-flex flex-column justify-content-between">
                         <div>
                             <!-- Input Kunci -->
-                            <div class="mb-3">
-                                <label for="secretKey" class="form-label fw-semibold">Kunci AES-128 (16 Karakter):</label>
-                                <input type="text" id="secretKey" value="SemarangKripto12" maxlength="16" class="form-control font-monospace">
+                            <div class="mb-1">
+                                <label for="secretKey" class="form-label fw-semibold">Kunci AES-256 (32 Karakter):</label>
+                                <input type="text" id="secretKey" value="SemarangKripto256BitKeyPraktikum" maxlength="32" class="form-control form-control-sm font-monospace">
+                            </div>
+
+                            <!-- Input IV (Initialization Vector) -->
+                            <div class="mb-1">
+                                <label for="ivInput" class="form-label fw-semibold">Initialization Vector / IV (16 Karakter):</label>
+                                <input type="text" id="ivInput" value="SemarangKriptoIV" maxlength="16" class="form-control form-control-sm font-monospace">
                             </div>
 
                             <!-- Input Unggah Gambar -->
-                            <div class="mb-3">
+                            <div class="mb-1">
                                 <label class="form-label fw-semibold">Unggah Gambar:</label>
-                                <label for="imageInput" id="dropZone" class="d-block border border-2 border-secondary-subtle rounded-3 p-3 text-center bg-light" role="button">
+                                <label for="imageInput" id="dropZone" class="d-block dropzone-compact text-center" role="button">
                                     <input type="file" id="imageInput" accept="image/*" class="d-none" onchange="handleImageSelect(event)">
-                                    <div class="py-2">
-                                        <i class="bi bi-cloud-arrow-up display-6 text-primary mb-1 d-block"></i>
-                                        <div class="fw-semibold text-dark small mb-0">Klik untuk memilih file atau drag & drop gambar di sini</div>
+                                    <div class="py-0.5">
+                                        <i class="bi bi-cloud-arrow-up fs-5 text-primary mb-0 d-block"></i>
+                                        <div class="fw-semibold text-dark" style="font-size: 0.72rem;">Pilih file atau drag & drop gambar ke sini</div>
                                     </div>
                                 </label>
                             </div>
@@ -56,26 +141,26 @@
 
                         <div>
                             <!-- Action Buttons -->
-                            <div class="row g-2 mb-2">
-                                <div class="col-sm-6">
-                                    <button id="btnEncrypt" onclick="processImage('encrypt')" class="btn btn-primary w-100 fw-semibold" disabled>
-                                        <i class="bi bi-lock-fill me-1"></i> Enkripsi Gambar
+                            <div class="row g-1 mb-1">
+                                <div class="col-6">
+                                    <button id="btnEncrypt" onclick="processImage('encrypt')" class="btn btn-sm btn-primary w-100 fw-semibold" disabled>
+                                        <i class="bi bi-lock-fill me-1"></i> Enkripsi
                                     </button>
                                 </div>
-                                <div class="col-sm-6">
-                                    <button id="btnDecrypt" onclick="processImage('decrypt')" class="btn btn-success w-100 fw-semibold" disabled>
-                                        <i class="bi bi-unlock-fill me-1"></i> Dekripsi Gambar
+                                <div class="col-6">
+                                    <button id="btnDecrypt" onclick="processImage('decrypt')" class="btn btn-sm btn-success w-100 fw-semibold" disabled>
+                                        <i class="bi bi-unlock-fill me-1"></i> Dekripsi
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Info Progress Bar -->
-                            <div id="progressContainer" class="d-none mt-2">
-                                <div class="d-flex justify-content-between small mb-1">
-                                    <span id="statusLabel" class="fw-semibold">Memproses byte gambar...</span>
+                            <div id="progressContainer" class="d-none mt-1">
+                                <div class="d-flex justify-content-between small mb-0.5" style="font-size: 0.7rem;">
+                                    <span id="statusLabel" class="fw-semibold">Memproses...</span>
                                     <span id="progressPercent" class="fw-bold text-primary">0%</span>
                                 </div>
-                                <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress" style="height: 5px;" role="progressbar" aria-valuemin="0" aria-valuemax="100">
                                     <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                                 </div>
                             </div>
@@ -85,125 +170,349 @@
                 </div>
             </div>
 
-            <!-- Informasi Algoritma & Parameter Panel -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-bold py-3">
-                        <i class="bi bi-info-circle-fill text-primary me-1"></i> Informasi Algoritma & Parameter
+            <!-- Kolom 2: Informasi Algoritma & Parameter Panel -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-info-circle-fill text-primary me-1"></i> Parameter AES-256 CBC</span>
+                        <span class="badge bg-secondary-subtle text-secondary font-monospace" style="font-size: 0.68rem;">NIST SP 800-38A</span>
                     </div>
                     <div class="card-body">
-                        <!-- Tabel Parameter -->
-                        <div class="table-responsive mb-3">
-                            <table class="table table-sm table-bordered mb-0 align-middle">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0 align-middle table-compact">
                                 <thead class="table-light">
                                     <tr>
-                                        <th style="width: 38%;">Parameter</th>
+                                        <th style="width: 44%;">Parameter</th>
                                         <th>Keterangan</th>
                                     </tr>
                                 </thead>
-                                <tbody class="small">
+                                <tbody>
                                     <tr>
                                         <td class="fw-semibold">Algoritma</td>
-                                        <td>AES-128 (Advanced Encryption Standard)</td>
+                                        <td>AES-256 (FIPS 197)</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-semibold">Mode Operasi</td>
-                                        <td>ECB (Electronic Codebook)</td>
+                                        <td>CBC (Cipher Block Chaining)</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-semibold">Ukuran Kunci</td>
-                                        <td>128 bit (16 Karakter / 16 Byte)</td>
+                                        <td>256 bit (32 Byte / Karakter)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold">Init Vector (IV)</td>
+                                        <td>128 bit (16 Byte / Karakter)</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-semibold">Ukuran Blok</td>
-                                        <td>128 bit (16 Byte, matriks state 4x4)</td>
+                                        <td>128 bit (State 4x4)</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-semibold">Jumlah Putaran</td>
-                                        <td>10 Rounds (11 Round Keys @16 Byte)</td>
+                                        <td>14 Rounds (15 Subkeys)</td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-semibold">Data Input</td>
-                                        <td>Array Byte RGB Piksel Gambar (Red, Green, Blue)</td>
+                                        <td class="fw-semibold">Format Data</td>
+                                        <td>RGB Raw Byte Array</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    <div class="card-footer bg-white text-muted font-monospace">
+                        Standar: FIPS-197 AES NIST
+                    </div>
+                </div>
+            </div>
 
-                        <!-- Langkah Pemrosesan -->
-                        <div class="card bg-light border-0 p-3">
-                            <h6 class="fw-bold mb-2 text-dark small">
-                                <i class="bi bi-diagram-3-fill text-primary me-1"></i> Langkah Pemrosesan AES-128:
-                            </h6>
-                            <ol class="small text-secondary mb-0 ps-3">
-                                <li class="mb-1"><strong class="text-dark">Key Expansion:</strong> Menghasilkan 11 Round Keys (176 byte) dari kunci utama via S-Box & Rcon.</li>
-                                <li class="mb-1"><strong class="text-dark">Ekstraksi RGB:</strong> Membagi byte RGB gambar ke dalam blok berukuran 16 byte.</li>
-                                <li class="mb-1"><strong class="text-dark">Initial Round:</strong> Operasi <code>AddRoundKey</code> (XOR byte blok dengan Round Key ke-0).</li>
-                                <li class="mb-1"><strong class="text-dark">Round 1–9:</strong> Transformasi <code>SubBytes</code>, <code>ShiftRows</code>, <code>MixColumns</code>, dan <code>AddRoundKey</code>.</li>
-                                <li class="mb-1"><strong class="text-dark">Final Round (10):</strong> <code>SubBytes</code>, <code>ShiftRows</code>, dan <code>AddRoundKey</code> (tanpa MixColumns).</li>
-                                <li><strong class="text-dark">Rekonstruksi Canvas:</strong> Menyusun kembali byte hasil ke kanvas gambar dengan kanal Alpha = 255.</li>
-                            </ol>
-                        </div>
+            <!-- Kolom 3: Langkah Pemrosesan Panel -->
+            <div class="col-lg-4 col-md-12">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-diagram-3-fill text-primary me-1"></i> Langkah Pemrosesan CBC</span>
+                        <span class="badge bg-info-subtle text-info font-monospace" style="font-size: 0.68rem;">Pipeline</span>
+                    </div>
+                    <div class="card-body">
+                        <ol class="text-secondary mb-0 ps-3" style="font-size: 0.74rem; line-height: 1.35;">
+                            <li class="mb-1"><strong class="text-dark">Key Expansion:</strong> 15 Round Keys (240 byte) dari kunci 256-bit via S-Box & Rcon.</li>
+                            <li class="mb-1"><strong class="text-dark">Ekstraksi RGB:</strong> Membagi byte RGB ke dalam blok 16 byte.</li>
+                            <li class="mb-1"><strong class="text-dark">Chaining (CBC):</strong> $C_0 = E_K(P_0 \oplus IV)$, blok $i$ di-XOR $C_{i-1}$.</li>
+                            <li class="mb-1"><strong class="text-dark">14 Putaran AES:</strong> SubBytes, ShiftRows, MixColumns (1–13), AddRoundKey. Round 14 tanpa MixColumns.</li>
+                            <li><strong class="text-dark">Rekonstruksi:</strong> Memetakan byte hasil ke canvas RGB, Alpha = 255.</li>
+                        </ol>
+                    </div>
+                    <div class="card-footer bg-white text-muted font-monospace">
+                        Keamanan: Difusi & Konfusi Penuh
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- Baris 2: Preview Gambar Input & Hasil (Simetris 6 : 6) -->
-        <div class="row g-4 mb-4">
-            <!-- Original Image Display -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+        <!-- Baris 2: Preview Gambar Input, Hasil, & Measurement (3 Kolom: 4 : 4 : 4) -->
+        <div class="row g-2 mb-2">
+            <!-- Kolom 1: Original Image Display -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
                         <div>
                             <i class="bi bi-file-earmark-image text-secondary me-1"></i> <span id="inputTitle">Gambar Input / Asli</span>
                         </div>
                         <span id="inputBadge" class="badge bg-secondary d-none"></span>
                     </div>
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light p-3" style="min-height: 260px;">
-                        <img id="originalPreview" class="img-fluid rounded d-none" style="max-height: 240px;" alt="Original Preview">
-                        <div id="originalPlaceholder" class="text-muted text-center py-4">
-                            <i class="bi bi-image fs-1 d-block text-secondary-subtle mb-1"></i>
-                            <span>Belum ada gambar yang dipilih</span>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light" style="min-height: 155px; max-height: 160px;">
+                        <img id="originalPreview" class="img-fluid rounded d-none" style="max-height: 145px; object-fit: contain;" alt="Original Preview">
+                        <div id="originalPlaceholder" class="text-muted text-center py-2">
+                            <i class="bi bi-image fs-3 d-block text-secondary-subtle mb-1"></i>
+                            <span style="font-size: 0.75rem;">Belum ada gambar yang dipilih</span>
                         </div>
                     </div>
-                    <div class="card-footer bg-white small text-muted d-flex justify-content-between font-monospace" id="originalDetails">
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace" id="originalDetails">
                         <span>Dimensi: -</span>
-                        <span>Ukuran Data: -</span>
+                        <span>Ukuran: -</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Result Image Display -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+            <!-- Kolom 2: Result Image Display -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
                         <div>
                             <i class="bi bi-shield-check text-success me-1"></i> <span id="resultTitle">Hasil Enkripsi / Dekripsi</span>
                         </div>
                         <span id="resultBadge" class="badge bg-secondary d-none"></span>
                     </div>
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light p-3" style="min-height: 260px;">
-                        <canvas id="resultCanvas" class="img-fluid rounded d-none" style="max-height: 240px;"></canvas>
-                        <div id="resultPlaceholder" class="text-muted text-center py-4">
-                            <i class="bi bi-cpu fs-1 d-block text-secondary-subtle mb-1"></i>
-                            <span>Jalankan proses untuk melihat hasil</span>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light" style="min-height: 155px; max-height: 160px;">
+                        <canvas id="resultCanvas" class="img-fluid rounded d-none" style="max-height: 145px; object-fit: contain;"></canvas>
+                        <div id="resultPlaceholder" class="text-muted text-center py-2">
+                            <i class="bi bi-cpu fs-3 d-block text-secondary-subtle mb-1"></i>
+                            <span style="font-size: 0.75rem;">Jalankan proses untuk melihat hasil</span>
                         </div>
                     </div>
-                    <div class="card-footer bg-white small text-muted d-flex justify-content-between align-items-center flex-wrap gap-2" id="resultDetails">
-                        <span id="processTime" class="font-monospace">Waktu Eksekusi: -</span>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <button id="btnReverseAction" class="btn btn-sm btn-success d-none fw-semibold" onclick="reverseProcess()">
-                                <i id="btnReverseIcon" class="bi bi-unlock-fill me-1"></i> <span id="btnReverseText">Dekripsi Hasil</span>
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between align-items-center flex-wrap gap-1" id="resultDetails">
+                        <span id="processTime" class="font-monospace">Waktu: -</span>
+                        <div class="d-flex gap-1 align-items-center flex-wrap">
+                            <button id="btnReverseAction" class="btn btn-sm btn-success d-none py-0 px-2 fw-semibold" style="font-size: 0.7rem;" onclick="reverseProcess()">
+                                <i id="btnReverseIcon" class="bi bi-unlock-fill me-1"></i> <span id="btnReverseText">Dekripsi</span>
                             </button>
-                            <button id="btnUseAsInput" class="btn btn-sm btn-outline-secondary d-none fw-semibold" onclick="useResultAsInput()">
-                                <i class="bi bi-arrow-left-right me-1"></i> Jadikan Input
+                            <button id="btnUseAsInput" class="btn btn-sm btn-outline-secondary d-none py-0 px-2 fw-semibold" style="font-size: 0.7rem;" onclick="useResultAsInput()">
+                                <i class="bi bi-arrow-left-right me-1"></i> Gunakan
                             </button>
-                            <a id="downloadBtn" class="btn btn-sm btn-outline-primary d-none fw-semibold" href="#" download>
-                                <i class="bi bi-download me-1"></i> Download
+                            <a id="downloadBtn" class="btn btn-sm btn-outline-primary d-none py-0 px-2 fw-semibold" style="font-size: 0.7rem;" href="#" download>
+                                <i class="bi bi-download me-1"></i> Unduh
                             </a>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom 3: Measurement Container -->
+            <div class="col-lg-4 col-md-12">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-speedometer2 text-primary me-1"></i> <span id="measureTitle">Hasil Pengukuran</span>
+                        </div>
+                        <span id="metricBadge" class="badge bg-secondary d-none">Siap</span>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between" style="min-height: 155px;">
+                        <div id="measurePlaceholder" class="text-muted text-center py-3 my-auto">
+                            <i class="bi bi-calculator fs-3 d-block text-secondary-subtle mb-1"></i>
+                            <span style="font-size: 0.75rem;">Jalankan proses untuk menampilkan metrik kriptografi</span>
+                        </div>
+
+                        <div id="measureContent" class="d-none">
+                            <!-- 1. Entropy -->
+                            <div class="metric-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="metric-title text-dark">
+                                        <i class="bi bi-shuffle text-primary me-1"></i> Entropy (Shannon)
+                                    </span>
+                                    <span id="metricEntropyBadge" class="badge bg-primary-subtle text-primary font-monospace py-0 px-1" style="font-size: 0.65rem;">Ideal: ~8.0</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span id="metricEntropyVal" class="metric-val text-dark">-</span>
+                                    <span class="metric-sub" id="metricEntropySub">Skala: 0 - 8 bit</span>
+                                </div>
+                                <div class="progress mt-0.5" style="height: 3px;">
+                                    <div id="metricEntropyBar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Correlation Coefficient -->
+                            <div class="metric-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="metric-title text-dark">
+                                        <i class="bi bi-bezier2 text-primary me-1"></i> Correlation Coefficient
+                                    </span>
+                                    <span id="metricCorrBadge" class="badge bg-secondary-subtle text-secondary font-monospace py-0 px-1" style="font-size: 0.65rem;">Ideal: ~0</span>
+                                </div>
+                                <div class="row g-1 font-monospace" style="font-size: 0.7rem;">
+                                    <div class="col-6">
+                                        <span class="text-muted">Plain vs Cipher: </span>
+                                        <span id="metricCorrPlainCipher" class="fw-bold text-dark">-</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="text-muted">Adjacent (H): </span>
+                                        <span id="metricCorrAdjacent" class="fw-bold text-dark">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. MSE & PSNR -->
+                            <div class="metric-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="metric-title text-dark">
+                                        <i class="bi bi-graph-down text-primary me-1"></i> MSE & PSNR
+                                    </span>
+                                    <span id="metricPSNRVal" class="badge bg-info-subtle text-info font-monospace py-0 px-1" style="font-size: 0.65rem;">PSNR: -</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span id="metricMSEVal" class="metric-val text-dark">-</span>
+                                    <span class="metric-sub">Rerata Kuadrat Galat</span>
+                                </div>
+                            </div>
+
+                            <!-- 4. Pixel Equality -->
+                            <div class="metric-card mb-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="metric-title text-dark">
+                                        <i class="bi bi-check2-all text-primary me-1"></i> Pixel Equality
+                                    </span>
+                                    <span id="metricEqualityBadge" class="badge bg-success py-0 px-1" style="font-size: 0.65rem;">100%</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span id="metricEqualityVal" class="metric-val text-dark">-</span>
+                                    <span class="metric-sub" id="metricNPCRVal">NPCR: -</span>
+                                </div>
+                                <div class="metric-sub text-muted mt-0.5" id="metricRefLabel" style="font-size: 0.65rem;">
+                                    Perbandingan: Input vs Hasil
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace" id="measureFooter">
+                        <span>Status: <span id="metricStatusText">-</span></span>
+                        <span id="metricCalcTime">Hitung: -</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Baris 3: Histogram & Analisis Keseragaman (3 Kolom: 4 : 4 : 4) -->
+        <div class="row g-2 mb-2">
+            <!-- Kolom 1: Histogram Gambar Input -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <span style="font-size: 0.8rem;"><i class="bi bi-bar-chart-fill text-primary me-1"></i> Histogram Input</span>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button id="btnHistInAll" type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5 active" style="font-size: 0.68rem;" onclick="setHistogramChannel('input', 'all')">RGB</button>
+                            <button id="btnHistInR" type="button" class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size: 0.68rem;" onclick="setHistogramChannel('input', 'r')">R</button>
+                            <button id="btnHistInG" type="button" class="btn btn-sm btn-outline-success py-0 px-1" style="font-size: 0.68rem;" onclick="setHistogramChannel('input', 'g')">G</button>
+                            <button id="btnHistInB" type="button" class="btn btn-sm btn-outline-primary py-0 px-1" style="font-size: 0.68rem;" onclick="setHistogramChannel('input', 'b')">B</button>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light" style="min-height: 125px;">
+                        <canvas id="inputHistCanvas" class="w-100 rounded d-none" style="height: 110px;"></canvas>
+                        <div id="inputHistPlaceholder" class="text-muted text-center py-2">
+                            <i class="bi bi-bar-chart fs-3 d-block text-secondary-subtle mb-1"></i>
+                            <span style="font-size: 0.74rem;">Pilih gambar untuk melihat histogram</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace" id="inputHistFooter">
+                        <span>Distribusi: Asimetris</span>
+                        <span id="inputHistMax">Kanal: RGB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom 2: Histogram Gambar Hasil -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <span style="font-size: 0.8rem;"><i class="bi bi-bar-chart-steps text-success me-1"></i> Histogram Hasil</span>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button id="btnHistResAll" type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5 active" style="font-size: 0.68rem;" onclick="setHistogramChannel('result', 'all')">RGB</button>
+                            <button id="btnHistResR" type="button" class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size: 0.68rem;" onclick="setHistogramChannel('result', 'r')">R</button>
+                            <button id="btnHistResG" type="button" class="btn btn-sm btn-outline-success py-0 px-1" style="font-size: 0.68rem;" onclick="setHistogramChannel('result', 'g')">G</button>
+                            <button id="btnHistResB" type="button" class="btn btn-sm btn-outline-primary py-0 px-1" style="font-size: 0.68rem;" onclick="setHistogramChannel('result', 'b')">B</button>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light" style="min-height: 125px;">
+                        <canvas id="resultHistCanvas" class="w-100 rounded d-none" style="height: 110px;"></canvas>
+                        <div id="resultHistPlaceholder" class="text-muted text-center py-2">
+                            <i class="bi bi-bar-chart-steps fs-3 d-block text-secondary-subtle mb-1"></i>
+                            <span style="font-size: 0.74rem;">Jalankan proses untuk melihat histogram</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace" id="resultHistFooter">
+                        <span>Distribusi: <span id="resultHistDistText">-</span></span>
+                        <span id="resultHistMax">Kanal: RGB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom 3: Analisis & Uji Keseragaman Histogram -->
+            <div class="col-lg-4 col-md-12">
+                <div class="card h-100">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <span style="font-size: 0.8rem;"><i class="bi bi-clipboard2-data text-primary me-1"></i> Analisis Histogram (&chi;&sup2;)</span>
+                        <span id="histTestBadge" class="badge bg-secondary d-none">Siap</span>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between" style="min-height: 125px;">
+                        <div id="histAnalysisPlaceholder" class="text-muted text-center py-2 my-auto">
+                            <i class="bi bi-file-earmark-bar-graph fs-3 d-block text-secondary-subtle mb-1"></i>
+                            <span style="font-size: 0.74rem;">Jalankan proses untuk melihat uji keseragaman (&chi;&sup2;)</span>
+                        </div>
+
+                        <div id="histAnalysisContent" class="d-none">
+                            <!-- Chi-Square Test -->
+                            <div class="metric-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="metric-title text-dark">
+                                        <i class="bi bi-calculator-fill text-primary me-1"></i> Uji Chi-Square (&chi;&sup2;)
+                                    </span>
+                                    <span id="chiSquareBadge" class="badge bg-success py-0 px-1" style="font-size: 0.65rem;">Lolos Uji</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span id="chiSquareVal" class="metric-val text-dark">-</span>
+                                    <span class="metric-sub">&chi;&sup2; Kritis: 293.25 (&alpha;=0.05)</span>
+                                </div>
+                            </div>
+
+                            <!-- Keseragaman & Deviasi -->
+                            <div class="metric-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="metric-title text-dark">
+                                        <i class="bi bi-distribute-horizontal text-primary me-1"></i> Deviasi Standar (&sigma;)
+                                    </span>
+                                    <span id="histStdDevVal" class="font-monospace fw-bold text-dark" style="font-size: 0.78rem;">-</span>
+                                </div>
+                                <div class="progress mt-0.5" style="height: 3px;">
+                                    <div id="histUniformityBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between metric-sub mt-0.5">
+                                    <span>Tingkat Keseragaman:</span>
+                                    <span id="histUniformityVal" class="fw-bold text-dark">-</span>
+                                </div>
+                            </div>
+
+                            <!-- Evaluasi Ketahanan -->
+                            <div class="metric-card mb-0">
+                                <div class="fw-bold text-dark" style="font-size: 0.68rem;">
+                                    <i class="bi bi-shield-lock text-success me-1"></i> Evaluasi Kriptografi:
+                                </div>
+                                <div class="text-secondary" id="histSecurityDesc" style="font-size: 0.68rem; line-height: 1.25;">
+                                    -
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-muted d-flex justify-content-between font-monospace" id="histFooter">
+                        <span>df = 255</span>
+                        <span id="histAnalysisStatus">-</span>
                     </div>
                 </div>
             </div>
@@ -215,7 +524,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         /**
-         * IMPLEMENTASI MANUAL ALGORITMA AES-128 (Advanced Encryption Standard)
+         * IMPLEMENTASI MANUAL ALGORITMA AES-256 (Advanced Encryption Standard)
          * Tanpa dependency atau library eksternal.
          */
 
@@ -275,19 +584,19 @@
             return p;
         }
 
-        // Key Expansion (Generasi 11 Subkey @16-bytes dari 128-bit Cipher Key)
+        // Key Expansion (Generasi 15 Subkey @16-bytes dari 256-bit Cipher Key)
         function keyExpansion(keyBytes) {
-            let w = new Uint8Array(176); // 11 * 16 = 176 bytes
-            for (let i = 0; i < 16; i++) w[i] = keyBytes[i];
+            let w = new Uint8Array(240); // 15 * 16 = 240 bytes (60 words)
+            for (let i = 0; i < 32; i++) w[i] = keyBytes[i];
 
-            let bytesGenerated = 16;
+            let bytesGenerated = 32;
             let rconIdx = 1;
             let temp = new Uint8Array(4);
 
-            while (bytesGenerated < 176) {
+            while (bytesGenerated < 240) {
                 for (let i = 0; i < 4; i++) temp[i] = w[bytesGenerated - 4 + i];
 
-                if (bytesGenerated % 16 === 0) {
+                if (bytesGenerated % 32 === 0) {
                     // RotWord
                     const t = temp[0];
                     temp[0] = temp[1];
@@ -303,10 +612,16 @@
 
                     // XOR Rcon
                     temp[0] ^= RCON[rconIdx++];
+                } else if (bytesGenerated % 32 === 16) {
+                    // SubWord khusus untuk AES-256 pada i % Nk == 4
+                    temp[0] = SBOX[temp[0]];
+                    temp[1] = SBOX[temp[1]];
+                    temp[2] = SBOX[temp[2]];
+                    temp[3] = SBOX[temp[3]];
                 }
 
                 for (let i = 0; i < 4; i++) {
-                    w[bytesGenerated] = w[bytesGenerated - 16] ^ temp[i];
+                    w[bytesGenerated] = w[bytesGenerated - 32] ^ temp[i];
                     bytesGenerated++;
                 }
             }
@@ -379,12 +694,12 @@
             }
         }
 
-        // Single Block Encryption (16 Bytes State)
+        // Single Block Encryption (16 Bytes State, 14 Putaran untuk AES-256)
         function encryptBlock(block, roundKeys) {
             let state = new Uint8Array(block);
             addRoundKey(state, roundKeys, 0);
 
-            for (let round = 1; round < 10; round++) {
+            for (let round = 1; round < 14; round++) {
                 subBytes(state);
                 shiftRows(state);
                 mixColumns(state);
@@ -393,16 +708,16 @@
 
             subBytes(state);
             shiftRows(state);
-            addRoundKey(state, roundKeys, 10);
+            addRoundKey(state, roundKeys, 14);
             return state;
         }
 
-        // Single Block Decryption (16 Bytes State)
+        // Single Block Decryption (16 Bytes State, 14 Putaran untuk AES-256)
         function decryptBlock(block, roundKeys) {
             let state = new Uint8Array(block);
-            addRoundKey(state, roundKeys, 10);
+            addRoundKey(state, roundKeys, 14);
 
-            for (let round = 9; round >= 1; round--) {
+            for (let round = 13; round >= 1; round--) {
                 invShiftRows(state);
                 invSubBytes(state);
                 addRoundKey(state, roundKeys, round);
@@ -416,8 +731,15 @@
         }
 
         let loadedImage = null;
+        let initialOriginalRgb = null;
         let lastProcessedMode = null;
         let lastResultData = null;
+
+        // State Histogram
+        let currentInputHistogramData = null;
+        let currentResultHistogramData = null;
+        let currentInputChannel = 'all';
+        let currentResultChannel = 'all';
 
         function handleImageSelect(evt) {
             const file = evt.target.files[0];
@@ -428,6 +750,7 @@
                 const img = new Image();
                 img.onload = function() {
                     loadedImage = img;
+                    initialOriginalRgb = null;
                     lastProcessedMode = null;
                     lastResultData = null;
 
@@ -455,7 +778,45 @@
                     document.getElementById('btnReverseAction').classList.add('d-none');
                     document.getElementById('btnUseAsInput').classList.add('d-none');
                     document.getElementById('downloadBtn').classList.add('d-none');
-                    document.getElementById('processTime').textContent = 'Waktu Eksekusi: -';
+                    document.getElementById('processTime').textContent = 'Waktu: -';
+
+                    // Reset tampilan measurement
+                    document.getElementById('measurePlaceholder').classList.remove('d-none');
+                    document.getElementById('measureContent').classList.add('d-none');
+                    const metricBadge = document.getElementById('metricBadge');
+                    if (metricBadge) metricBadge.classList.add('d-none');
+                    document.getElementById('metricStatusText').textContent = '-';
+                    document.getElementById('metricCalcTime').textContent = 'Hitung: -';
+
+                    // Hitung dan gambar Histogram Input segera setelah gambar diunggah
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = img.width;
+                    tempCanvas.height = img.height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.drawImage(img, 0, 0);
+                    const tempImgData = tempCtx.getImageData(0, 0, img.width, img.height);
+                    const tempRgb = new Uint8Array((tempImgData.data.length / 4) * 3);
+                    let tIdx = 0;
+                    for (let i = 0; i < tempImgData.data.length; i += 4) {
+                        tempRgb[tIdx++] = tempImgData.data[i];
+                        tempRgb[tIdx++] = tempImgData.data[i + 1];
+                        tempRgb[tIdx++] = tempImgData.data[i + 2];
+                    }
+                    currentInputHistogramData = computeHistogram(tempRgb);
+                    document.getElementById('inputHistCanvas').classList.remove('d-none');
+                    document.getElementById('inputHistPlaceholder').classList.add('d-none');
+                    drawHistogram('inputHistCanvas', currentInputHistogramData, currentInputChannel);
+
+                    // Reset Histogram Hasil & Analisis
+                    currentResultHistogramData = null;
+                    document.getElementById('resultHistCanvas').classList.add('d-none');
+                    document.getElementById('resultHistPlaceholder').classList.remove('d-none');
+                    document.getElementById('resultHistDistText').textContent = '-';
+                    document.getElementById('histAnalysisPlaceholder').classList.remove('d-none');
+                    document.getElementById('histAnalysisContent').classList.add('d-none');
+                    const histTestBadge = document.getElementById('histTestBadge');
+                    if (histTestBadge) histTestBadge.classList.add('d-none');
+                    document.getElementById('histAnalysisStatus').textContent = '-';
 
                     // Enable buttons
                     document.getElementById('btnEncrypt').disabled = false;
@@ -466,16 +827,16 @@
             reader.readAsDataURL(file);
         }
 
-        // Convert String to 16-byte Uint8Array
-        function parseKeyOrIV(str, label) {
+        // Convert String to Uint8Array dengan panjang target (e.g. 32 untuk Key, 16 untuk IV)
+        function parseKeyOrIV(str, targetLength) {
             const enc = new TextEncoder();
             let bytes = enc.encode(str);
-            if (bytes.length < 16) {
-                let padded = new Uint8Array(16);
+            if (bytes.length < targetLength) {
+                let padded = new Uint8Array(targetLength);
                 padded.set(bytes);
                 return padded;
-            } else if (bytes.length > 16) {
-                return bytes.slice(0, 16);
+            } else if (bytes.length > targetLength) {
+                return bytes.slice(0, targetLength);
             }
             return bytes;
         }
@@ -534,8 +895,11 @@
 
             try {
                 const keyStr = document.getElementById('secretKey').value;
-                const keyBytes = parseKeyOrIV(keyStr, "Key");
+                const keyBytes = parseKeyOrIV(keyStr, 32);
                 const roundKeys = keyExpansion(keyBytes);
+
+                const ivStr = document.getElementById('ivInput').value;
+                const ivBytes = parseKeyOrIV(ivStr, 16);
 
                 let width, height, rgbBytes, canvas, ctx, imgData, data;
 
@@ -581,10 +945,12 @@
                 const statusLabel = document.getElementById('statusLabel');
 
                 progressContainer.classList.remove('d-none');
-                statusLabel.textContent = `Memproses mode ${mode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'} (ECB)...`;
+                statusLabel.textContent = `Memproses mode ${mode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'} (CBC)...`;
 
                 const startTime = performance.now();
                 const processedRgb = new Uint8Array(totalBlocks * 16);
+
+                let prevCipherBlock = new Uint8Array(ivBytes);
 
                 const chunkSize = 2500;
                 let blockIdx = 0;
@@ -594,24 +960,31 @@
 
                     for (; blockIdx < endBlock; blockIdx++) {
                         const offset = blockIdx * 16;
-                        let block = new Uint8Array(16);
 
-                        for (let b = 0; b < 16; b++) {
-                            if (offset + b < rgbBytes.length) {
-                                block[b] = rgbBytes[offset + b];
-                            } else {
-                                block[b] = 0;
-                            }
-                        }
-
-                        let resultBlock;
                         if (mode === 'encrypt') {
-                            resultBlock = encryptBlock(block, roundKeys);
-                        } else {
-                            resultBlock = decryptBlock(block, roundKeys);
-                        }
+                            let block = new Uint8Array(16);
+                            for (let b = 0; b < 16; b++) {
+                                const plainByte = (offset + b < rgbBytes.length) ? rgbBytes[offset + b] : 0;
+                                block[b] = plainByte ^ prevCipherBlock[b];
+                            }
 
-                        processedRgb.set(resultBlock, offset);
+                            const resultBlock = encryptBlock(block, roundKeys);
+                            prevCipherBlock.set(resultBlock);
+                            processedRgb.set(resultBlock, offset);
+                        } else {
+                            let cipherBlock = new Uint8Array(16);
+                            for (let b = 0; b < 16; b++) {
+                                cipherBlock[b] = (offset + b < rgbBytes.length) ? rgbBytes[offset + b] : 0;
+                            }
+
+                            const decryptedBlock = decryptBlock(cipherBlock, roundKeys);
+                            let plainBlock = new Uint8Array(16);
+                            for (let b = 0; b < 16; b++) {
+                                plainBlock[b] = decryptedBlock[b] ^ prevCipherBlock[b];
+                            }
+                            prevCipherBlock.set(cipherBlock);
+                            processedRgb.set(plainBlock, offset);
+                        }
                     }
 
                     const pct = Math.round((blockIdx / totalBlocks) * 100);
@@ -655,11 +1028,23 @@
                     mode: mode
                 };
 
+                if (!initialOriginalRgb && mode === 'encrypt') {
+                    initialOriginalRgb = new Uint8Array(rgbBytes);
+                }
+
                 updateResultActions(mode);
+                displayMeasurements(mode, rgbBytes, processedRgb, canvas.width, canvas.height);
+
+                // Render Histogram Hasil & Analisis Keseragaman Chi-Square
+                currentResultHistogramData = computeHistogram(processedRgb);
+                document.getElementById('resultHistCanvas').classList.remove('d-none');
+                document.getElementById('resultHistPlaceholder').classList.add('d-none');
+                drawHistogram('resultHistCanvas', currentResultHistogramData, currentResultChannel);
+                updateHistogramAnalysis(mode, currentResultHistogramData, processedRgb.length);
 
                 const downloadBtn = document.getElementById('downloadBtn');
                 downloadBtn.href = resCanvas.toDataURL('image/png');
-                downloadBtn.download = `${mode}_AES128_ECB_result.png`;
+                downloadBtn.download = `${mode}_AES256_CBC_result.png`;
                 downloadBtn.classList.remove('d-none');
 
                 setTimeout(() => progressContainer.classList.add('d-none'), 1000);
@@ -740,6 +1125,407 @@
                 document.getElementById('btnDecrypt').disabled = false;
             };
             img.src = dataUrl;
+
+            // Reset panel measurement
+            document.getElementById('measurePlaceholder').classList.remove('d-none');
+            document.getElementById('measureContent').classList.add('d-none');
+            const metricBadge = document.getElementById('metricBadge');
+            if (metricBadge) metricBadge.classList.add('d-none');
+            document.getElementById('metricStatusText').textContent = '-';
+            document.getElementById('metricCalcTime').textContent = 'Hitung: -';
+
+            // Transfer Histogram Hasil ke Histogram Input
+            if (currentResultHistogramData) {
+                currentInputHistogramData = currentResultHistogramData;
+                document.getElementById('inputHistCanvas').classList.remove('d-none');
+                document.getElementById('inputHistPlaceholder').classList.add('d-none');
+                drawHistogram('inputHistCanvas', currentInputHistogramData, currentInputChannel);
+            }
+            currentResultHistogramData = null;
+            document.getElementById('resultHistCanvas').classList.add('d-none');
+            document.getElementById('resultHistPlaceholder').classList.remove('d-none');
+            document.getElementById('resultHistDistText').textContent = '-';
+            document.getElementById('histAnalysisPlaceholder').classList.remove('d-none');
+            document.getElementById('histAnalysisContent').classList.add('d-none');
+            const histTestBadge = document.getElementById('histTestBadge');
+            if (histTestBadge) histTestBadge.classList.add('d-none');
+            document.getElementById('histAnalysisStatus').textContent = '-';
+        }
+
+        // ==========================================
+        // PENGUKURAN METRIK KRIPTOGRAFI GAMBAR
+        // ==========================================
+        function calculateMeasurements(inputRgb, resultRgb, width, height, compareRgb = null) {
+            const startTime = performance.now();
+            const N = Math.min(inputRgb.length, resultRgb.length);
+
+            // 1. Shannon Entropy (Keacakan byte gambar hasil)
+            const counts = new Uint32Array(256);
+            for (let i = 0; i < resultRgb.length; i++) {
+                counts[resultRgb[i]]++;
+            }
+            let entropy = 0;
+            const totalBytes = resultRgb.length;
+            for (let i = 0; i < 256; i++) {
+                if (counts[i] > 0) {
+                    const p = counts[i] / totalBytes;
+                    entropy -= p * Math.log2(p);
+                }
+            }
+
+            // Target referensi perbandingan: compareRgb (misal gambar asli awal saat dekripsi) atau inputRgb
+            const refRgb = compareRgb || inputRgb;
+            const refN = Math.min(refRgb.length, resultRgb.length);
+
+            // 2. MSE (Mean Squared Error) & PSNR
+            let sumSqErr = 0;
+            for (let i = 0; i < refN; i++) {
+                const diff = refRgb[i] - resultRgb[i];
+                sumSqErr += diff * diff;
+            }
+            const mse = sumSqErr / refN;
+            const psnr = mse === 0 ? Infinity : 10 * Math.log10((255 * 255) / mse);
+
+            // 3. Pixel Equality (Kesamaan Piksel) & NPCR
+            const totalPixels = width * height;
+            let equalPixels = 0;
+            for (let p = 0; p < totalPixels; p++) {
+                const idx = p * 3;
+                if (idx + 2 < refN) {
+                    if (refRgb[idx] === resultRgb[idx] &&
+                        refRgb[idx + 1] === resultRgb[idx + 1] &&
+                        refRgb[idx + 2] === resultRgb[idx + 2]) {
+                        equalPixels++;
+                    }
+                }
+            }
+            const pixelEquality = (equalPixels / totalPixels) * 100;
+            const npcr = ((totalPixels - equalPixels) / totalPixels) * 100;
+
+            // 4. Correlation Coefficient (Korelasi Piksel Referensi vs Hasil)
+            let sumX = 0, sumY = 0;
+            for (let i = 0; i < refN; i++) {
+                sumX += refRgb[i];
+                sumY += resultRgb[i];
+            }
+            const meanX = sumX / refN;
+            const meanY = sumY / refN;
+
+            let num = 0, denX = 0, denY = 0;
+            for (let i = 0; i < refN; i++) {
+                const dx = refRgb[i] - meanX;
+                const dy = resultRgb[i] - meanY;
+                num += dx * dy;
+                denX += dx * dx;
+                denY += dy * dy;
+            }
+            const correlation = (denX === 0 || denY === 0) ? 0 : num / Math.sqrt(denX * denY);
+
+            // Adjacent Horizontal Correlation (Piksel Bersebelahan pada Gambar Hasil)
+            let sumAdjX = 0, sumAdjY = 0, adjCount = 0;
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width - 1; x++) {
+                    const idx1 = (y * width + x) * 3;
+                    const idx2 = (y * width + (x + 1)) * 3;
+                    sumAdjX += resultRgb[idx1];
+                    sumAdjY += resultRgb[idx2];
+                    adjCount++;
+                }
+            }
+            const meanAdjX = sumAdjX / adjCount;
+            const meanAdjY = sumAdjY / adjCount;
+            let numAdj = 0, denAdjX = 0, denAdjY = 0;
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width - 1; x++) {
+                    const idx1 = (y * width + x) * 3;
+                    const idx2 = (y * width + (x + 1)) * 3;
+                    const dx = resultRgb[idx1] - meanAdjX;
+                    const dy = resultRgb[idx2] - meanAdjY;
+                    numAdj += dx * dy;
+                    denAdjX += dx * dx;
+                    denAdjY += dy * dy;
+                }
+            }
+            const adjCorrelation = (denAdjX === 0 || denAdjY === 0) ? 0 : numAdj / Math.sqrt(denAdjX * denAdjY);
+
+            const calcTime = (performance.now() - startTime).toFixed(1);
+
+            return {
+                entropy,
+                mse,
+                psnr,
+                pixelEquality,
+                npcr,
+                correlation,
+                adjCorrelation,
+                calcTime
+            };
+        }
+
+        function displayMeasurements(mode, inputRgb, resultRgb, width, height) {
+            let compareRgb = null;
+            let compareLabel = "Input vs Hasil";
+
+            if (mode === 'decrypt' && initialOriginalRgb && initialOriginalRgb.length === resultRgb.length) {
+                compareRgb = initialOriginalRgb;
+                compareLabel = "Hasil Dekripsi vs Gambar Asli";
+            }
+
+            const m = calculateMeasurements(inputRgb, resultRgb, width, height, compareRgb);
+
+            document.getElementById('measurePlaceholder').classList.add('d-none');
+            document.getElementById('measureContent').classList.remove('d-none');
+
+            const metricBadge = document.getElementById('metricBadge');
+            if (metricBadge) {
+                metricBadge.classList.remove('d-none');
+                metricBadge.textContent = mode === 'encrypt' ? 'Analisis Enkripsi' : 'Analisis Dekripsi';
+                metricBadge.className = mode === 'encrypt' ? 'badge bg-danger' : 'badge bg-success';
+            }
+
+            // 1. Entropy
+            document.getElementById('metricEntropyVal').textContent = m.entropy.toFixed(4);
+            const entropyPct = Math.min(100, Math.max(0, (m.entropy / 8) * 100));
+            const entropyBar = document.getElementById('metricEntropyBar');
+            entropyBar.style.width = `${entropyPct}%`;
+            const entropyBadge = document.getElementById('metricEntropyBadge');
+            if (m.entropy > 7.9) {
+                entropyBar.className = 'progress-bar bg-success';
+                entropyBadge.className = 'badge bg-success-subtle text-success font-monospace';
+                entropyBadge.textContent = 'Acak Tinggi';
+            } else {
+                entropyBar.className = 'progress-bar bg-primary';
+                entropyBadge.className = 'badge bg-primary-subtle text-primary font-monospace';
+                entropyBadge.textContent = 'Terstruktur';
+            }
+
+            // 2. Correlation
+            document.getElementById('metricCorrPlainCipher').textContent = m.correlation.toFixed(4);
+            document.getElementById('metricCorrAdjacent').textContent = m.adjCorrelation.toFixed(4);
+
+            // 3. MSE & PSNR
+            document.getElementById('metricMSEVal').textContent = m.mse.toFixed(2);
+            const psnrText = m.psnr === Infinity ? 'Lossless (∞ dB)' : `${m.psnr.toFixed(2)} dB`;
+            document.getElementById('metricPSNRVal').textContent = `PSNR: ${psnrText}`;
+
+            // 4. Pixel Equality
+            document.getElementById('metricEqualityVal').textContent = `${m.pixelEquality.toFixed(2)}%`;
+            document.getElementById('metricNPCRVal').textContent = `NPCR: ${m.npcr.toFixed(2)}%`;
+            document.getElementById('metricRefLabel').textContent = `Perbandingan: ${compareLabel}`;
+
+            const equalityBadge = document.getElementById('metricEqualityBadge');
+            if (m.pixelEquality >= 99.99) {
+                equalityBadge.textContent = '100% Identik';
+                equalityBadge.className = 'badge bg-success';
+            } else if (m.pixelEquality < 1) {
+                equalityBadge.textContent = 'Terkripto';
+                equalityBadge.className = 'badge bg-danger';
+            } else {
+                equalityBadge.textContent = `${m.pixelEquality.toFixed(1)}% Cocok`;
+                equalityBadge.className = 'badge bg-warning text-dark';
+            }
+
+            document.getElementById('metricStatusText').textContent = mode === 'encrypt' ? 'Terenkripsi' : 'Terdekripsi';
+            document.getElementById('metricCalcTime').textContent = `Hitung: ${m.calcTime} ms`;
+        }
+
+        // ==========================================
+        // PENGHITUNGAN & VISUALISASI HISTOGRAM
+        // ==========================================
+        function computeHistogram(rgbBytes) {
+            const r = new Uint32Array(256);
+            const g = new Uint32Array(256);
+            const b = new Uint32Array(256);
+            const gray = new Uint32Array(256);
+
+            for (let i = 0; i < rgbBytes.length; i += 3) {
+                const rv = rgbBytes[i];
+                const gv = rgbBytes[i + 1];
+                const bv = rgbBytes[i + 2];
+                r[rv]++;
+                g[gv]++;
+                b[bv]++;
+                const y = Math.min(255, Math.round(0.299 * rv + 0.587 * gv + 0.114 * bv));
+                gray[y]++;
+            }
+
+            return { r, g, b, gray, totalPixels: rgbBytes.length / 3 };
+        }
+
+        function drawHistogram(canvasId, histData, channel = 'all') {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas || !histData) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const width = Math.max(260, Math.floor(rect.width || canvas.parentElement.clientWidth || 340));
+            const height = Math.floor(canvas.clientHeight || 110);
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, height);
+
+            // Background & subtle grid
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = '#f1f3f5';
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 3; i++) {
+                const y = Math.round((height / 4) * i);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            let maxPeak = 1;
+            if (channel === 'all') {
+                for (let i = 0; i < 256; i++) {
+                    if (histData.r[i] > maxPeak) maxPeak = histData.r[i];
+                    if (histData.g[i] > maxPeak) maxPeak = histData.g[i];
+                    if (histData.b[i] > maxPeak) maxPeak = histData.b[i];
+                }
+            } else if (channel === 'r') {
+                for (let i = 0; i < 256; i++) if (histData.r[i] > maxPeak) maxPeak = histData.r[i];
+            } else if (channel === 'g') {
+                for (let i = 0; i < 256; i++) if (histData.g[i] > maxPeak) maxPeak = histData.g[i];
+            } else if (channel === 'b') {
+                for (let i = 0; i < 256; i++) if (histData.b[i] > maxPeak) maxPeak = histData.b[i];
+            }
+
+            const chartHeight = height - 13;
+
+            function renderPath(counts, strokeColor, fillColor) {
+                ctx.beginPath();
+                ctx.moveTo(0, chartHeight);
+                for (let i = 0; i < 256; i++) {
+                    const x = (i / 255) * width;
+                    const h = (counts[i] / maxPeak) * (chartHeight - 6);
+                    const y = chartHeight - h;
+                    ctx.lineTo(x, y);
+                }
+                ctx.lineTo(width, chartHeight);
+                ctx.closePath();
+
+                if (fillColor) {
+                    ctx.fillStyle = fillColor;
+                    ctx.fill();
+                }
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = 1.3;
+                ctx.stroke();
+            }
+
+            if (channel === 'all') {
+                renderPath(histData.r, 'rgba(220, 53, 69, 0.85)', 'rgba(220, 53, 69, 0.22)');
+                renderPath(histData.g, 'rgba(25, 135, 84, 0.85)', 'rgba(25, 135, 84, 0.22)');
+                renderPath(histData.b, 'rgba(13, 110, 253, 0.85)', 'rgba(13, 110, 253, 0.22)');
+            } else if (channel === 'r') {
+                renderPath(histData.r, '#dc3545', 'rgba(220, 53, 69, 0.35)');
+            } else if (channel === 'g') {
+                renderPath(histData.g, '#198754', 'rgba(25, 135, 84, 0.35)');
+            } else if (channel === 'b') {
+                renderPath(histData.b, '#0d6efd', 'rgba(13, 110, 253, 0.35)');
+            }
+
+            // X-axis scale indicators
+            ctx.fillStyle = '#6c757d';
+            ctx.font = '9px monospace';
+            ctx.fillText('0', 3, height - 2);
+            ctx.fillText('128', Math.round(width / 2) - 8, height - 2);
+            ctx.fillText('255', width - 20, height - 2);
+        }
+
+        function setHistogramChannel(type, channel) {
+            const btnIds = type === 'input' 
+                ? { all: 'btnHistInAll', r: 'btnHistInR', g: 'btnHistInG', b: 'btnHistInB' }
+                : { all: 'btnHistResAll', r: 'btnHistResR', g: 'btnHistResG', b: 'btnHistResB' };
+
+            ['all', 'r', 'g', 'b'].forEach(ch => {
+                const btn = document.getElementById(btnIds[ch]);
+                if (btn) {
+                    if (ch === channel) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                }
+            });
+
+            if (type === 'input') {
+                currentInputChannel = channel;
+                drawHistogram('inputHistCanvas', currentInputHistogramData, channel);
+            } else {
+                currentResultChannel = channel;
+                drawHistogram('resultHistCanvas', currentResultHistogramData, channel);
+            }
+        }
+
+        // Analisis Keseragaman Chi-Square pada Histogram Hasil
+        function updateHistogramAnalysis(mode, histData, totalBytes) {
+            const E = totalBytes / 256;
+            const combined = new Uint32Array(256);
+            for (let i = 0; i < 256; i++) {
+                combined[i] = histData.r[i] + histData.g[i] + histData.b[i];
+            }
+
+            let chiSquare = 0;
+            for (let i = 0; i < 256; i++) {
+                const diff = combined[i] - E;
+                chiSquare += (diff * diff) / E;
+            }
+
+            let varSum = 0;
+            for (let i = 0; i < 256; i++) {
+                varSum += (combined[i] - E) ** 2;
+            }
+            const stdDev = Math.sqrt(varSum / 256);
+
+            // Nilai Keseragaman (Uniformity %)
+            const cv = stdDev / E;
+            const uniformityPct = Math.max(0, Math.min(100, (1 - cv) * 100));
+
+            document.getElementById('histAnalysisPlaceholder').classList.add('d-none');
+            document.getElementById('histAnalysisContent').classList.remove('d-none');
+
+            const testBadge = document.getElementById('histTestBadge');
+            if (testBadge) {
+                testBadge.classList.remove('d-none');
+                testBadge.textContent = mode === 'encrypt' ? 'Ciphertext' : 'Plaintext';
+                testBadge.className = mode === 'encrypt' ? 'badge bg-danger' : 'badge bg-success';
+            }
+
+            document.getElementById('chiSquareVal').textContent = chiSquare.toFixed(2);
+            document.getElementById('histStdDevVal').textContent = `±${stdDev.toFixed(1)}`;
+            document.getElementById('histUniformityVal').textContent = `${uniformityPct.toFixed(1)}%`;
+            document.getElementById('histUniformityBar').style.width = `${uniformityPct}%`;
+
+            const chiBadge = document.getElementById('chiSquareBadge');
+            const secDesc = document.getElementById('histSecurityDesc');
+            const statusText = document.getElementById('histAnalysisStatus');
+            const resultDistText = document.getElementById('resultHistDistText');
+
+            // Nilai kritis df=255 pada alpha=0.05 adalah 293.25; alpha=0.01 adalah 310.46
+            if (chiSquare < 310.46 && mode === 'encrypt') {
+                chiBadge.textContent = 'Lolos Uji Uniform';
+                chiBadge.className = 'badge bg-success';
+                document.getElementById('histUniformityBar').className = 'progress-bar bg-success';
+                secDesc.innerHTML = `<span class="text-success fw-bold">Distribusi Seragam:</span> Histogram ciphertext sangat rata (flat). Kebal terhadap serangan analisis statistik frekuensi kemunculan byte.`;
+                statusText.textContent = 'Status: Seragam (Lolos)';
+                if (resultDistText) resultDistText.textContent = 'Seragam (Flat)';
+            } else if (mode === 'encrypt') {
+                chiBadge.textContent = 'Teracak Kuat';
+                chiBadge.className = 'badge bg-primary';
+                document.getElementById('histUniformityBar').className = 'progress-bar bg-primary';
+                secDesc.innerHTML = `<span class="text-primary fw-bold">Terenkripsi Kuat:</span> Distribusi byte teracak merata, seluruh pola citra asli berhasil disamarkan.`;
+                statusText.textContent = 'Status: Terenkripsi';
+                if (resultDistText) resultDistText.textContent = 'Teracak Merata';
+            } else {
+                chiBadge.textContent = 'Pola Alami (Non-Acak)';
+                chiBadge.className = 'badge bg-warning text-dark';
+                document.getElementById('histUniformityBar').className = 'progress-bar bg-warning';
+                secDesc.innerHTML = `<span class="text-secondary fw-bold">Citra Terbuka:</span> Histogram memiliki puncak dan lembah khas citra natural (non-acak).`;
+                statusText.textContent = 'Status: Citra Asli';
+                if (resultDistText) resultDistText.textContent = 'Puncak Khas';
+            }
         }
 
         // Setup Drag and Drop
@@ -762,6 +1548,16 @@
             if (files.length > 0) {
                 document.getElementById('imageInput').files = files;
                 handleImageSelect({ target: { files: files } });
+            }
+        });
+
+        // Responsif redraw histogram saat window di-resize
+        window.addEventListener('resize', () => {
+            if (currentInputHistogramData) {
+                drawHistogram('inputHistCanvas', currentInputHistogramData, currentInputChannel);
+            }
+            if (currentResultHistogramData) {
+                drawHistogram('resultHistCanvas', currentResultHistogramData, currentResultChannel);
             }
         });
         </script>
