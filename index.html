@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enkripsi & Dekripsi Gambar AES-128 (Manual)</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+    <!-- Header / Navbar -->
+    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4 shadow-sm">
+        <div class="container">
+            <span class="navbar-brand d-flex align-items-center gap-2 fw-bold mb-0">
+                <i class="bi bi-shield-lock-fill"></i>
+                AES-128 Image Cipher
+            </span>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container pb-5">
+
+        <!-- Baris 1: Form Input & Informasi Algoritma (Simetris 6 : 6) -->
+        <div class="row g-4 mb-4">
+            
+            <!-- Form Input Panel -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold py-3">
+                        <i class="bi bi-sliders text-primary me-1"></i> Form Input
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <!-- Input Kunci -->
+                            <div class="mb-3">
+                                <label for="secretKey" class="form-label fw-semibold">Kunci AES-128 (16 Karakter):</label>
+                                <input type="text" id="secretKey" value="SemarangKripto12" maxlength="16" class="form-control font-monospace">
+                            </div>
+
+                            <!-- Input Unggah Gambar -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Unggah Gambar:</label>
+                                <label for="imageInput" id="dropZone" class="d-block border border-2 border-secondary-subtle rounded-3 p-3 text-center bg-light" role="button">
+                                    <input type="file" id="imageInput" accept="image/*" class="d-none" onchange="handleImageSelect(event)">
+                                    <div class="py-2">
+                                        <i class="bi bi-cloud-arrow-up display-6 text-primary mb-1 d-block"></i>
+                                        <div class="fw-semibold text-dark small mb-0">Klik untuk memilih file atau drag & drop gambar di sini</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <!-- Action Buttons -->
+                            <div class="row g-2 mb-2">
+                                <div class="col-sm-6">
+                                    <button id="btnEncrypt" onclick="processImage('encrypt')" class="btn btn-primary w-100 fw-semibold" disabled>
+                                        <i class="bi bi-lock-fill me-1"></i> Enkripsi Gambar
+                                    </button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button id="btnDecrypt" onclick="processImage('decrypt')" class="btn btn-success w-100 fw-semibold" disabled>
+                                        <i class="bi bi-unlock-fill me-1"></i> Dekripsi Gambar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Info Progress Bar -->
+                            <div id="progressContainer" class="d-none mt-2">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span id="statusLabel" class="fw-semibold">Memproses byte gambar...</span>
+                                    <span id="progressPercent" class="fw-bold text-primary">0%</span>
+                                </div>
+                                <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informasi Algoritma & Parameter Panel -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold py-3">
+                        <i class="bi bi-info-circle-fill text-primary me-1"></i> Informasi Algoritma & Parameter
+                    </div>
+                    <div class="card-body">
+                        <!-- Tabel Parameter -->
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm table-bordered mb-0 align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 38%;">Parameter</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="small">
+                                    <tr>
+                                        <td class="fw-semibold">Algoritma</td>
+                                        <td>AES-128 (Advanced Encryption Standard)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold">Mode Operasi</td>
+                                        <td>ECB (Electronic Codebook)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold">Ukuran Kunci</td>
+                                        <td>128 bit (16 Karakter / 16 Byte)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold">Ukuran Blok</td>
+                                        <td>128 bit (16 Byte, matriks state 4x4)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold">Jumlah Putaran</td>
+                                        <td>10 Rounds (11 Round Keys @16 Byte)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold">Data Input</td>
+                                        <td>Array Byte RGB Piksel Gambar (Red, Green, Blue)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Langkah Pemrosesan -->
+                        <div class="card bg-light border-0 p-3">
+                            <h6 class="fw-bold mb-2 text-dark small">
+                                <i class="bi bi-diagram-3-fill text-primary me-1"></i> Langkah Pemrosesan AES-128:
+                            </h6>
+                            <ol class="small text-secondary mb-0 ps-3">
+                                <li class="mb-1"><strong class="text-dark">Key Expansion:</strong> Menghasilkan 11 Round Keys (176 byte) dari kunci utama via S-Box & Rcon.</li>
+                                <li class="mb-1"><strong class="text-dark">Ekstraksi RGB:</strong> Membagi byte RGB gambar ke dalam blok berukuran 16 byte.</li>
+                                <li class="mb-1"><strong class="text-dark">Initial Round:</strong> Operasi <code>AddRoundKey</code> (XOR byte blok dengan Round Key ke-0).</li>
+                                <li class="mb-1"><strong class="text-dark">Round 1–9:</strong> Transformasi <code>SubBytes</code>, <code>ShiftRows</code>, <code>MixColumns</code>, dan <code>AddRoundKey</code>.</li>
+                                <li class="mb-1"><strong class="text-dark">Final Round (10):</strong> <code>SubBytes</code>, <code>ShiftRows</code>, dan <code>AddRoundKey</code> (tanpa MixColumns).</li>
+                                <li><strong class="text-dark">Rekonstruksi Canvas:</strong> Menyusun kembali byte hasil ke kanvas gambar dengan kanal Alpha = 255.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Baris 2: Preview Gambar Input & Hasil (Simetris 6 : 6) -->
+        <div class="row g-4 mb-4">
+            <!-- Original Image Display -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-file-earmark-image text-secondary me-1"></i> <span id="inputTitle">Gambar Input / Asli</span>
+                        </div>
+                        <span id="inputBadge" class="badge bg-secondary d-none"></span>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light p-3" style="min-height: 260px;">
+                        <img id="originalPreview" class="img-fluid rounded d-none" style="max-height: 240px;" alt="Original Preview">
+                        <div id="originalPlaceholder" class="text-muted text-center py-4">
+                            <i class="bi bi-image fs-1 d-block text-secondary-subtle mb-1"></i>
+                            <span>Belum ada gambar yang dipilih</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white small text-muted d-flex justify-content-between font-monospace" id="originalDetails">
+                        <span>Dimensi: -</span>
+                        <span>Ukuran Data: -</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Image Display -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-shield-check text-success me-1"></i> <span id="resultTitle">Hasil Enkripsi / Dekripsi</span>
+                        </div>
+                        <span id="resultBadge" class="badge bg-secondary d-none"></span>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-light p-3" style="min-height: 260px;">
+                        <canvas id="resultCanvas" class="img-fluid rounded d-none" style="max-height: 240px;"></canvas>
+                        <div id="resultPlaceholder" class="text-muted text-center py-4">
+                            <i class="bi bi-cpu fs-1 d-block text-secondary-subtle mb-1"></i>
+                            <span>Jalankan proses untuk melihat hasil</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white small text-muted d-flex justify-content-between align-items-center flex-wrap gap-2" id="resultDetails">
+                        <span id="processTime" class="font-monospace">Waktu Eksekusi: -</span>
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <button id="btnReverseAction" class="btn btn-sm btn-success d-none fw-semibold" onclick="reverseProcess()">
+                                <i id="btnReverseIcon" class="bi bi-unlock-fill me-1"></i> <span id="btnReverseText">Dekripsi Hasil</span>
+                            </button>
+                            <button id="btnUseAsInput" class="btn btn-sm btn-outline-secondary d-none fw-semibold" onclick="useResultAsInput()">
+                                <i class="bi bi-arrow-left-right me-1"></i> Jadikan Input
+                            </button>
+                            <a id="downloadBtn" class="btn btn-sm btn-outline-primary d-none fw-semibold" href="#" download>
+                                <i class="bi bi-download me-1"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /**
+         * IMPLEMENTASI MANUAL ALGORITMA AES-128 (Advanced Encryption Standard)
+         * Tanpa dependency atau library eksternal.
+         */
+
+        // 1. S-Box (Substitution Box) Standar AES
+        const SBOX = new Uint8Array([
+            0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
+            0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
+            0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
+            0x04, 0xc7, 0x23, 0xc3, 0x18, 0x96, 0x05, 0x9a, 0x07, 0x12, 0x80, 0xe2, 0xeb, 0x27, 0xb2, 0x75,
+            0x09, 0x83, 0x2c, 0x1a, 0x1b, 0x6e, 0x5a, 0xa0, 0x52, 0x3b, 0xd6, 0xb3, 0x29, 0xe3, 0x2f, 0x84,
+            0x53, 0xd1, 0x00, 0xed, 0x20, 0xfc, 0xb1, 0x5b, 0x6a, 0xcb, 0xbe, 0x39, 0x4a, 0x4c, 0x58, 0xcf,
+            0xd0, 0xef, 0xaa, 0xfb, 0x43, 0x4d, 0x33, 0x85, 0x45, 0xf9, 0x02, 0x7f, 0x50, 0x3c, 0x9f, 0xa8,
+            0x51, 0xa3, 0x40, 0x8f, 0x92, 0x9d, 0x38, 0xf5, 0xbc, 0xb6, 0xda, 0x21, 0x10, 0xff, 0xf3, 0xd2,
+            0xcd, 0x0c, 0x13, 0xec, 0x5f, 0x97, 0x44, 0x17, 0xc4, 0xa7, 0x7e, 0x3d, 0x64, 0x5d, 0x19, 0x73,
+            0x60, 0x81, 0x4f, 0xdc, 0x22, 0x2a, 0x90, 0x88, 0x46, 0xee, 0xb8, 0x14, 0xde, 0x5e, 0x0b, 0xdb,
+            0xe0, 0x32, 0x3a, 0x0a, 0x49, 0x06, 0x24, 0x5c, 0xc2, 0xd3, 0xac, 0x62, 0x91, 0x95, 0xe4, 0x79,
+            0xe7, 0xc8, 0x37, 0x6d, 0x8d, 0xd5, 0x4e, 0xa9, 0x6c, 0x56, 0xf4, 0xea, 0x65, 0x7a, 0xae, 0x08,
+            0xba, 0x78, 0x25, 0x2e, 0x1c, 0xa6, 0xb4, 0xc6, 0xe8, 0xdd, 0x74, 0x1f, 0x4b, 0xbd, 0x8b, 0x8a,
+            0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e,
+            0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
+            0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
+        ]);
+
+        // 2. Inverse S-Box untuk Dekripsi
+        const INV_SBOX = new Uint8Array([
+            0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
+            0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
+            0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
+            0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25,
+            0x72, 0xf8, 0xf6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xd4, 0xa4, 0x5c, 0xcc, 0x5d, 0x65, 0xb6, 0x92,
+            0x6c, 0x70, 0x48, 0x50, 0xfd, 0xed, 0xb9, 0xda, 0x5e, 0x15, 0x46, 0x57, 0xa7, 0x8d, 0x9d, 0x84,
+            0x90, 0xd8, 0xab, 0x00, 0x8c, 0xbc, 0xd3, 0x0a, 0xf7, 0xe4, 0x58, 0x05, 0xb8, 0xb3, 0x45, 0x06,
+            0xd0, 0x2c, 0x1e, 0x8f, 0xca, 0x3f, 0x0f, 0x02, 0xc1, 0xaf, 0xbd, 0x03, 0x01, 0x13, 0x8a, 0x6b,
+            0x3a, 0x91, 0x11, 0x41, 0x4f, 0x67, 0xdc, 0xea, 0x97, 0xf2, 0xcf, 0xce, 0xf0, 0xb4, 0xe6, 0x73,
+            0x96, 0xac, 0x74, 0x22, 0xe7, 0xad, 0x35, 0x85, 0xe2, 0xf9, 0x37, 0xe8, 0x1c, 0x75, 0xdf, 0x6e,
+            0x47, 0xf1, 0x1a, 0x71, 0x1d, 0x29, 0xc5, 0x89, 0x6f, 0xb7, 0x62, 0x0e, 0xaa, 0x18, 0xbe, 0x1b,
+            0xfc, 0x56, 0x3e, 0x4b, 0xc6, 0xd2, 0x79, 0x20, 0x9a, 0xdb, 0xc0, 0xfe, 0x78, 0xcd, 0x5a, 0xf4,
+            0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xec, 0x5f,
+            0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef,
+            0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
+            0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
+        ]);
+
+        // 3. Round Constant (Rcon)
+        const RCON = [0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36];
+
+        // Perkalian Galois Field GF(2^8) untuk MixColumns
+        function gmul(a, b) {
+            let p = 0;
+            for (let counter = 0; counter < 8; counter++) {
+                if ((b & 1) !== 0) p ^= a;
+                let hi_bit_set = (a & 0x80) !== 0;
+                a = (a << 1) & 0xFF;
+                if (hi_bit_set) a ^= 0x1b; // Polynomial x^8 + x^4 + x^3 + x + 1
+                b >>= 1;
+            }
+            return p;
+        }
+
+        // Key Expansion (Generasi 11 Subkey @16-bytes dari 128-bit Cipher Key)
+        function keyExpansion(keyBytes) {
+            let w = new Uint8Array(176); // 11 * 16 = 176 bytes
+            for (let i = 0; i < 16; i++) w[i] = keyBytes[i];
+
+            let bytesGenerated = 16;
+            let rconIdx = 1;
+            let temp = new Uint8Array(4);
+
+            while (bytesGenerated < 176) {
+                for (let i = 0; i < 4; i++) temp[i] = w[bytesGenerated - 4 + i];
+
+                if (bytesGenerated % 16 === 0) {
+                    // RotWord
+                    const t = temp[0];
+                    temp[0] = temp[1];
+                    temp[1] = temp[2];
+                    temp[2] = temp[3];
+                    temp[3] = t;
+
+                    // SubWord
+                    temp[0] = SBOX[temp[0]];
+                    temp[1] = SBOX[temp[1]];
+                    temp[2] = SBOX[temp[2]];
+                    temp[3] = SBOX[temp[3]];
+
+                    // XOR Rcon
+                    temp[0] ^= RCON[rconIdx++];
+                }
+
+                for (let i = 0; i < 4; i++) {
+                    w[bytesGenerated] = w[bytesGenerated - 16] ^ temp[i];
+                    bytesGenerated++;
+                }
+            }
+            return w;
+        }
+
+        // AddRoundKey Transformation
+        function addRoundKey(state, roundKey, round) {
+            for (let i = 0; i < 16; i++) {
+                state[i] ^= roundKey[round * 16 + i];
+            }
+        }
+
+        // SubBytes Transformation
+        function subBytes(state) {
+            for (let i = 0; i < 16; i++) state[i] = SBOX[state[i]];
+        }
+
+        // Inverse SubBytes Transformation
+        function invSubBytes(state) {
+            for (let i = 0; i < 16; i++) state[i] = INV_SBOX[state[i]];
+        }
+
+        // ShiftRows Transformation
+        function shiftRows(state) {
+            let t = new Uint8Array(16);
+            t.set(state);
+            // Row 0: tidak bergeser
+            // Row 1: geser kiri 1
+            state[1] = t[5]; state[5] = t[9]; state[9] = t[13]; state[13] = t[1];
+            // Row 2: geser kiri 2
+            state[2] = t[10]; state[6] = t[14]; state[10] = t[2]; state[14] = t[6];
+            // Row 3: geser kiri 3
+            state[3] = t[15]; state[7] = t[3]; state[11] = t[7]; state[15] = t[11];
+        }
+
+        // Inverse ShiftRows Transformation
+        function invShiftRows(state) {
+            let t = new Uint8Array(16);
+            t.set(state);
+            // Row 1: geser kanan 1
+            state[1] = t[13]; state[5] = t[1]; state[9] = t[5]; state[13] = t[9];
+            // Row 2: geser kanan 2
+            state[2] = t[10]; state[6] = t[14]; state[10] = t[2]; state[14] = t[6];
+            // Row 3: geser kanan 3
+            state[3] = t[7]; state[7] = t[11]; state[11] = t[15]; state[15] = t[3];
+        }
+
+        // MixColumns Transformation
+        function mixColumns(s) {
+            for (let c = 0; c < 4; c++) {
+                let i = c * 4;
+                let a0 = s[i], a1 = s[i+1], a2 = s[i+2], a3 = s[i+3];
+                s[i]   = gmul(a0, 2) ^ gmul(a1, 3) ^ a2 ^ a3;
+                s[i+1] = a0 ^ gmul(a1, 2) ^ gmul(a2, 3) ^ a3;
+                s[i+2] = a0 ^ a1 ^ gmul(a2, 2) ^ gmul(a3, 3);
+                s[i+3] = gmul(a0, 3) ^ a1 ^ a2 ^ gmul(a3, 2);
+            }
+        }
+
+        // Inverse MixColumns Transformation
+        function invMixColumns(s) {
+            for (let c = 0; c < 4; c++) {
+                let i = c * 4;
+                let a0 = s[i], a1 = s[i+1], a2 = s[i+2], a3 = s[i+3];
+                s[i]   = gmul(a0, 0x0e) ^ gmul(a1, 0x0b) ^ gmul(a2, 0x0d) ^ gmul(a3, 0x09);
+                s[i+1] = gmul(a0, 0x09) ^ gmul(a1, 0x0e) ^ gmul(a2, 0x0b) ^ gmul(a3, 0x0d);
+                s[i+2] = gmul(a0, 0x0d) ^ gmul(a1, 0x09) ^ gmul(a2, 0x0e) ^ gmul(a3, 0x0b);
+                s[i+3] = gmul(a0, 0x0b) ^ gmul(a1, 0x0d) ^ gmul(a2, 0x09) ^ gmul(a3, 0x0e);
+            }
+        }
+
+        // Single Block Encryption (16 Bytes State)
+        function encryptBlock(block, roundKeys) {
+            let state = new Uint8Array(block);
+            addRoundKey(state, roundKeys, 0);
+
+            for (let round = 1; round < 10; round++) {
+                subBytes(state);
+                shiftRows(state);
+                mixColumns(state);
+                addRoundKey(state, roundKeys, round);
+            }
+
+            subBytes(state);
+            shiftRows(state);
+            addRoundKey(state, roundKeys, 10);
+            return state;
+        }
+
+        // Single Block Decryption (16 Bytes State)
+        function decryptBlock(block, roundKeys) {
+            let state = new Uint8Array(block);
+            addRoundKey(state, roundKeys, 10);
+
+            for (let round = 9; round >= 1; round--) {
+                invShiftRows(state);
+                invSubBytes(state);
+                addRoundKey(state, roundKeys, round);
+                invMixColumns(state);
+            }
+
+            invShiftRows(state);
+            invSubBytes(state);
+            addRoundKey(state, roundKeys, 0);
+            return state;
+        }
+
+        let loadedImage = null;
+        let lastProcessedMode = null;
+        let lastResultData = null;
+
+        function handleImageSelect(evt) {
+            const file = evt.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    loadedImage = img;
+                    lastProcessedMode = null;
+                    lastResultData = null;
+
+                    // Display preview
+                    const origPreview = document.getElementById('originalPreview');
+                    origPreview.src = e.target.result;
+                    origPreview.classList.remove('d-none');
+                    document.getElementById('originalPlaceholder').classList.add('d-none');
+
+                    document.getElementById('inputTitle').textContent = 'Gambar Input / Asli';
+                    const inputBadge = document.getElementById('inputBadge');
+                    if (inputBadge) inputBadge.classList.add('d-none');
+
+                    document.getElementById('originalDetails').innerHTML = `
+                        <span>Dimensi: ${img.width}x${img.height} px</span>
+                        <span>Ukuran: ${(file.size / 1024).toFixed(1)} KB</span>
+                    `;
+
+                    // Reset tampilan hasil
+                    document.getElementById('resultCanvas').classList.add('d-none');
+                    document.getElementById('resultPlaceholder').classList.remove('d-none');
+                    document.getElementById('resultTitle').textContent = 'Hasil Enkripsi / Dekripsi';
+                    const resultBadge = document.getElementById('resultBadge');
+                    if (resultBadge) resultBadge.classList.add('d-none');
+                    document.getElementById('btnReverseAction').classList.add('d-none');
+                    document.getElementById('btnUseAsInput').classList.add('d-none');
+                    document.getElementById('downloadBtn').classList.add('d-none');
+                    document.getElementById('processTime').textContent = 'Waktu Eksekusi: -';
+
+                    // Enable buttons
+                    document.getElementById('btnEncrypt').disabled = false;
+                    document.getElementById('btnDecrypt').disabled = false;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Convert String to 16-byte Uint8Array
+        function parseKeyOrIV(str, label) {
+            const enc = new TextEncoder();
+            let bytes = enc.encode(str);
+            if (bytes.length < 16) {
+                let padded = new Uint8Array(16);
+                padded.set(bytes);
+                return padded;
+            } else if (bytes.length > 16) {
+                return bytes.slice(0, 16);
+            }
+            return bytes;
+        }
+
+        function setButtonsDisabled(disabled) {
+            document.getElementById('btnEncrypt').disabled = disabled;
+            document.getElementById('btnDecrypt').disabled = disabled;
+            const btnReverse = document.getElementById('btnReverseAction');
+            if (btnReverse) btnReverse.disabled = disabled;
+            const btnUseAsInput = document.getElementById('btnUseAsInput');
+            if (btnUseAsInput) btnUseAsInput.disabled = disabled;
+        }
+
+        function updateResultActions(mode) {
+            const btnReverse = document.getElementById('btnReverseAction');
+            const btnReverseIcon = document.getElementById('btnReverseIcon');
+            const btnReverseText = document.getElementById('btnReverseText');
+            const btnUseAsInput = document.getElementById('btnUseAsInput');
+            const resultBadge = document.getElementById('resultBadge');
+            const resultTitle = document.getElementById('resultTitle');
+
+            if (mode === 'encrypt') {
+                resultTitle.textContent = 'Hasil Enkripsi (Ciphertext)';
+                if (resultBadge) {
+                    resultBadge.textContent = 'Terenkripsi';
+                    resultBadge.className = 'badge bg-danger';
+                    resultBadge.classList.remove('d-none');
+                }
+                btnReverse.className = 'btn btn-sm btn-success fw-semibold';
+                btnReverseIcon.className = 'bi bi-unlock-fill me-1';
+                btnReverseText.textContent = 'Dekripsi Hasil';
+            } else {
+                resultTitle.textContent = 'Hasil Dekripsi (Plaintext)';
+                if (resultBadge) {
+                    resultBadge.textContent = 'Terdekripsi';
+                    resultBadge.className = 'badge bg-success';
+                    resultBadge.classList.remove('d-none');
+                }
+                btnReverse.className = 'btn btn-sm btn-primary fw-semibold';
+                btnReverseIcon.className = 'bi bi-lock-fill me-1';
+                btnReverseText.textContent = 'Enkripsi Hasil';
+            }
+
+            btnReverse.classList.remove('d-none');
+            btnReverse.disabled = false;
+            if (btnUseAsInput) {
+                btnUseAsInput.classList.remove('d-none');
+                btnUseAsInput.disabled = false;
+            }
+        }
+
+        async function processImage(mode, inputRgbBytes = null) {
+            if (!loadedImage && !inputRgbBytes) return;
+
+            setButtonsDisabled(true);
+
+            try {
+                const keyStr = document.getElementById('secretKey').value;
+                const keyBytes = parseKeyOrIV(keyStr, "Key");
+                const roundKeys = keyExpansion(keyBytes);
+
+                let width, height, rgbBytes, canvas, ctx, imgData, data;
+
+                if (inputRgbBytes && lastResultData) {
+                    width = lastResultData.width;
+                    height = lastResultData.height;
+                    rgbBytes = inputRgbBytes;
+
+                    canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx = canvas.getContext('2d');
+                    imgData = ctx.createImageData(width, height);
+                    data = imgData.data;
+                } else {
+                    width = loadedImage.width;
+                    height = loadedImage.height;
+
+                    canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx = canvas.getContext('2d');
+                    ctx.drawImage(loadedImage, 0, 0);
+
+                    imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    data = imgData.data;
+
+                    rgbBytes = new Uint8Array((data.length / 4) * 3);
+                    let idx = 0;
+                    for (let i = 0; i < data.length; i += 4) {
+                        rgbBytes[idx++] = data[i];     // R
+                        rgbBytes[idx++] = data[i + 1]; // G
+                        rgbBytes[idx++] = data[i + 2]; // B
+                    }
+                }
+
+                const totalBlocks = Math.ceil(rgbBytes.length / 16);
+
+                // UI Progress Element
+                const progressContainer = document.getElementById('progressContainer');
+                const progressBar = document.getElementById('progressBar');
+                const progressPercent = document.getElementById('progressPercent');
+                const statusLabel = document.getElementById('statusLabel');
+
+                progressContainer.classList.remove('d-none');
+                statusLabel.textContent = `Memproses mode ${mode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'} (ECB)...`;
+
+                const startTime = performance.now();
+                const processedRgb = new Uint8Array(totalBlocks * 16);
+
+                const chunkSize = 2500;
+                let blockIdx = 0;
+
+                async function processChunk() {
+                    const endBlock = Math.min(blockIdx + chunkSize, totalBlocks);
+
+                    for (; blockIdx < endBlock; blockIdx++) {
+                        const offset = blockIdx * 16;
+                        let block = new Uint8Array(16);
+
+                        for (let b = 0; b < 16; b++) {
+                            if (offset + b < rgbBytes.length) {
+                                block[b] = rgbBytes[offset + b];
+                            } else {
+                                block[b] = 0;
+                            }
+                        }
+
+                        let resultBlock;
+                        if (mode === 'encrypt') {
+                            resultBlock = encryptBlock(block, roundKeys);
+                        } else {
+                            resultBlock = decryptBlock(block, roundKeys);
+                        }
+
+                        processedRgb.set(resultBlock, offset);
+                    }
+
+                    const pct = Math.round((blockIdx / totalBlocks) * 100);
+                    progressBar.style.width = `${pct}%`;
+                    progressPercent.textContent = `${pct}%`;
+
+                    if (blockIdx < totalBlocks) {
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                        await processChunk();
+                    }
+                }
+
+                await processChunk();
+
+                const endTime = performance.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+                let idx = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i]     = processedRgb[idx++]; // R
+                    data[i + 1] = processedRgb[idx++]; // G
+                    data[i + 2] = processedRgb[idx++]; // B
+                    data[i + 3] = 255;
+                }
+
+                const resCanvas = document.getElementById('resultCanvas');
+                resCanvas.width = canvas.width;
+                resCanvas.height = canvas.height;
+                const resCtx = resCanvas.getContext('2d');
+                resCtx.putImageData(imgData, 0, 0);
+
+                resCanvas.classList.remove('d-none');
+                document.getElementById('resultPlaceholder').classList.add('d-none');
+                document.getElementById('processTime').textContent = `Waktu Eksekusi: ${duration}s`;
+
+                lastProcessedMode = mode;
+                lastResultData = {
+                    rgbBytes: processedRgb,
+                    width: canvas.width,
+                    height: canvas.height,
+                    mode: mode
+                };
+
+                updateResultActions(mode);
+
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.href = resCanvas.toDataURL('image/png');
+                downloadBtn.download = `${mode}_AES128_ECB_result.png`;
+                downloadBtn.classList.remove('d-none');
+
+                setTimeout(() => progressContainer.classList.add('d-none'), 1000);
+            } finally {
+                setButtonsDisabled(false);
+            }
+        }
+
+        async function reverseProcess() {
+            if (!lastProcessedMode || !lastResultData) return;
+
+            const targetMode = lastProcessedMode === 'encrypt' ? 'decrypt' : 'encrypt';
+            const currentRgb = lastResultData.rgbBytes;
+            const resCanvas = document.getElementById('resultCanvas');
+            const dataUrl = resCanvas.toDataURL('image/png');
+
+            // Pindahkan hasil saat ini ke panel input
+            const origPreview = document.getElementById('originalPreview');
+            origPreview.src = dataUrl;
+            origPreview.classList.remove('d-none');
+            document.getElementById('originalPlaceholder').classList.add('d-none');
+
+            const inputTitle = document.getElementById('inputTitle');
+            if (inputTitle) {
+                inputTitle.textContent = `Gambar Input (${lastProcessedMode === 'encrypt' ? 'Ciphertext' : 'Plaintext'})`;
+            }
+            const inputBadge = document.getElementById('inputBadge');
+            if (inputBadge) {
+                inputBadge.textContent = lastProcessedMode === 'encrypt' ? 'Terenkripsi' : 'Terdekripsi';
+                inputBadge.className = `badge ${lastProcessedMode === 'encrypt' ? 'bg-danger' : 'bg-success'}`;
+                inputBadge.classList.remove('d-none');
+            }
+
+            document.getElementById('originalDetails').innerHTML = `
+                <span>Dimensi: ${lastResultData.width}x${lastResultData.height} px</span>
+                <span>Sumber: Hasil ${lastProcessedMode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'}</span>
+            `;
+
+            // Buat Image untuk loadedImage
+            const img = new Image();
+            img.src = dataUrl;
+            loadedImage = img;
+
+            // Jalankan proses kebalikannya langsung
+            await processImage(targetMode, currentRgb);
+        }
+
+        function useResultAsInput() {
+            if (!lastResultData) return;
+            const resCanvas = document.getElementById('resultCanvas');
+            const dataUrl = resCanvas.toDataURL('image/png');
+
+            const origPreview = document.getElementById('originalPreview');
+            origPreview.src = dataUrl;
+            origPreview.classList.remove('d-none');
+            document.getElementById('originalPlaceholder').classList.add('d-none');
+
+            const inputTitle = document.getElementById('inputTitle');
+            if (inputTitle) {
+                inputTitle.textContent = `Gambar Input (${lastProcessedMode === 'encrypt' ? 'Ciphertext' : 'Plaintext'})`;
+            }
+            const inputBadge = document.getElementById('inputBadge');
+            if (inputBadge) {
+                inputBadge.textContent = lastProcessedMode === 'encrypt' ? 'Terenkripsi' : 'Terdekripsi';
+                inputBadge.className = `badge ${lastProcessedMode === 'encrypt' ? 'bg-danger' : 'bg-success'}`;
+                inputBadge.classList.remove('d-none');
+            }
+
+            document.getElementById('originalDetails').innerHTML = `
+                <span>Dimensi: ${lastResultData.width}x${lastResultData.height} px</span>
+                <span>Sumber: Hasil ${lastProcessedMode === 'encrypt' ? 'Enkripsi' : 'Dekripsi'}</span>
+            `;
+
+            const img = new Image();
+            img.onload = function() {
+                loadedImage = img;
+                document.getElementById('btnEncrypt').disabled = false;
+                document.getElementById('btnDecrypt').disabled = false;
+            };
+            img.src = dataUrl;
+        }
+
+        // Setup Drag and Drop
+        const dropZone = document.getElementById('dropZone');
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-primary', 'bg-white');
+            }, false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-primary', 'bg-white');
+            }, false);
+        });
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                document.getElementById('imageInput').files = files;
+                handleImageSelect({ target: { files: files } });
+            }
+        });
+        </script>
+</body>
+</html>
