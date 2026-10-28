@@ -331,7 +331,7 @@
                 </div>
             </div>
 
-            <!-- Kolom 3: Semua Matriks Pengukuran (Angka Saja, Tanpa Tab & Grafik) -->
+            <!-- Kolom 3: Matriks Pengukuran Terpisah (Enkripsi & Dekripsi) -->
             <div class="col-lg-4 col-md-12">
                 <div class="card h-100">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center py-1">
@@ -340,116 +340,152 @@
                         </div>
                         <span id="metricBadge" class="badge bg-secondary-subtle text-secondary font-monospace" style="font-size: 0.65rem;">Standby</span>
                     </div>
-                    <div class="card-body p-2 d-flex flex-column justify-content-between" style="min-height: 220px;">
+                    <div class="card-body p-2 d-flex flex-column justify-content-start gap-2" style="min-height: 220px;">
                         
-                        <!-- Semua Matriks Pengukuran (Angka Saja, Format Seragam) -->
-                        <div class="row g-1">
-                            <!-- CC -->
-                            <div class="col-6">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">CC</span>
-                                        <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Korelasi</span>
-                                    </div>
-                                    <div id="iemCC" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
-                                    <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs encrypted</div>
-                                </div>
+                        <!-- SEKSI 1: HASIL PENGUKURAN ENKRIPSI (Plaintext vs Ciphertext) -->
+                        <div id="sectionMetricEnc" class="w-100">
+                            <div class="d-flex justify-content-between align-items-center px-1.5 py-0.5 mb-1 rounded bg-danger-subtle text-danger border border-danger-subtle">
+                                <span class="fw-bold" style="font-size: 0.7rem;">
+                                    <i class="bi bi-lock-fill me-1"></i> Hasil Pengukuran Enkripsi <span class="text-secondary fw-normal" style="font-size: 0.62rem;">(Plain vs Cipher)</span>
+                                </span>
+                                <span class="badge bg-danger text-white font-monospace py-0 px-1" style="font-size: 0.58rem;">Keamanan</span>
                             </div>
 
-                            <!-- NCC -->
-                            <div class="col-6">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">NCC</span>
-                                        <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Norm. X-Corr</span>
+                            <div class="row g-1">
+                                <!-- CC -->
+                                <div class="col-6">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">CC</span>
+                                            <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Korelasi</span>
+                                        </div>
+                                        <div id="iemCC" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.6rem;">Plain vs Cipher (Ideal ~0)</div>
                                     </div>
-                                    <div id="iemNCC" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
-                                    <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs encrypted</div>
                                 </div>
+
+                                <!-- NCC -->
+                                <div class="col-6">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">NCC</span>
+                                            <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Norm. X-Corr</span>
+                                        </div>
+                                        <div id="iemNCC" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.6rem;">Norm. X-Corr (Ideal ~0)</div>
+                                    </div>
+                                </div>
+
+                                <!-- SSIM Cipher -->
+                                <div class="col-6">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">SSIM (Cipher)</span>
+                                            <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Struktur</span>
+                                        </div>
+                                        <div id="iemSSIM" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.6rem;">Kemiripan (Ideal ~0)</div>
+                                    </div>
+                                </div>
+
+                                <!-- Shannon Entropy -->
+                                <div class="col-6">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Entropy (Shannon)</span>
+                                            <span id="metricEntropyBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Skala 0-8</span>
+                                        </div>
+                                        <div id="metricEntropyVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.6rem;">Ideal: ~8.0000 bit</div>
+                                    </div>
+                                </div>
+
+                                <!-- MSE Cipher -->
+                                <div class="col-12">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">MSE (Mean Squared Error Cipher)</span>
+                                            <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Galat Acak</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-baseline">
+                                            <div id="metricMSEVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                            <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs Cipher (Semakin besar semakin acak)</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Adjacent Correlation Numbers -->
+                                <div class="col-12">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center mb-0.5">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Korelasi Adjacent (Piksel Tetangga)</span>
+                                            <span id="metricCorrAdjTotal" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.6rem;">Rerata: —</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between font-monospace text-secondary" style="font-size: 0.67rem;">
+                                            <span>H: <strong id="metricCorrAdjH" class="text-dark">—</strong></span>
+                                            <span>V: <strong id="metricCorrAdjV" class="text-dark">—</strong></span>
+                                            <span>D: <strong id="metricCorrAdjD" class="text-dark">—</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEKSI 2: HASIL PENGUKURAN DEKRIPSI (Plaintext vs Decrypted) -->
+                        <div id="sectionMetricDec" class="w-100">
+                            <div class="d-flex justify-content-between align-items-center px-1.5 py-0.5 mb-1 rounded bg-success-subtle text-success border border-success-subtle">
+                                <span class="fw-bold" style="font-size: 0.7rem;">
+                                    <i class="bi bi-unlock-fill me-1"></i> Hasil Pengukuran Dekripsi <span class="text-secondary fw-normal" style="font-size: 0.62rem;">(Plain vs Rekonstruksi)</span>
+                                </span>
+                                <span id="iemBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Standby</span>
                             </div>
 
-                            <!-- SSIM -->
-                            <div class="col-6">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">SSIM</span>
-                                        <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Struktur</span>
+                            <div class="row g-1">
+                                <!-- SSIM setelah dekripsi -->
+                                <div class="col-6">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold text-truncate" style="font-size: 0.68rem;" title="SSIM setelah dekripsi">SSIM Dekripsi</span>
+                                            <span class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Restorasi</span>
+                                        </div>
+                                        <div id="iemSSIMDec" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.6rem;">Lossless: 1.0000</div>
                                     </div>
-                                    <div id="iemSSIM" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
-                                    <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs encrypted</div>
                                 </div>
-                            </div>
 
-                            <!-- SSIM setelah dekripsi -->
-                            <div class="col-6">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary fw-semibold text-truncate" style="font-size: 0.68rem;" title="SSIM setelah dekripsi">SSIM Dekripsi</span>
-                                        <span id="iemBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Standby</span>
+                                <!-- PSNR -->
+                                <div class="col-6">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">PSNR (Dekripsi)</span>
+                                            <span id="metricPSNRValBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">dB</span>
+                                        </div>
+                                        <div id="metricPSNRVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.6rem;">Lossless: ∞ dB</div>
                                     </div>
-                                    <div id="iemSSIMDec" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
-                                    <div class="text-muted text-truncate" style="font-size: 0.6rem;">Original vs decrypted</div>
                                 </div>
-                            </div>
-                            <!-- Shannon Entropy -->
-                            <div class="col-6">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Entropy (Shannon)</span>
-                                        <span id="metricEntropyBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Skala 0-8</span>
-                                    </div>
-                                    <div id="metricEntropyVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
-                                    <div class="text-muted" style="font-size: 0.6rem;">Ideal: ~8.0000 bit</div>
-                                </div>
-                            </div>
 
-                            <!-- PSNR -->
-                            <div class="col-6">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">PSNR (Dekripsi)</span>
-                                        <span id="metricPSNRValBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">dB</span>
+                                <!-- MSE Dekripsi -->
+                                <div class="col-6">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">MSE (Dekripsi)</span>
+                                            <span id="metricMSEDecBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">Galat</span>
+                                        </div>
+                                        <div id="metricMSEDecVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.6rem;">Lossless: 0.0000</div>
                                     </div>
-                                    <div id="metricPSNRVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
-                                    <div class="text-muted" style="font-size: 0.6rem;">Lossless: ∞ dB</div>
                                 </div>
-                            </div>
 
-                            <!-- MSE -->
-                            <div class="col-6">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">MSE (Cipher)</span>
-                                        <span class="text-muted" style="font-size: 0.58rem;">Rerata Galat</span>
-                                    </div>
-                                    <div id="metricMSEVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
-                                    <div class="text-muted" style="font-size: 0.6rem;">Mean Squared Error</div>
-                                </div>
-                            </div>
-
-                            <!-- Pixel Equality -->
-                            <div class="col-6">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Pixel Equality</span>
-                                        <span id="metricEqualityBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">—</span>
-                                    </div>
-                                    <div id="metricEqualityVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
-                                    <div class="text-muted text-truncate" id="metricDiffVal" style="font-size: 0.6rem;">Piksel Berbeda: —</div>
-                                </div>
-                            </div>
-
-                            <!-- Adjacent Correlation Numbers -->
-                            <div class="col-12">
-                                <div class="p-1 border rounded bg-white">
-                                    <div class="d-flex justify-content-between align-items-center mb-0.5">
-                                        <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Korelasi Adjacent (Piksel Tetangga)</span>
-                                        <span id="metricCorrAdjTotal" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.6rem;">Rerata: —</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between font-monospace text-secondary" style="font-size: 0.67rem;">
-                                        <span>H: <strong id="metricCorrAdjH" class="text-dark">—</strong></span>
-                                        <span>V: <strong id="metricCorrAdjV" class="text-dark">—</strong></span>
-                                        <span>D: <strong id="metricCorrAdjD" class="text-dark">—</strong></span>
+                                <!-- Pixel Equality -->
+                                <div class="col-6">
+                                    <div class="p-1 border rounded bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-secondary fw-semibold" style="font-size: 0.68rem;">Pixel Equality</span>
+                                            <span id="metricEqualityBadge" class="badge bg-light text-secondary border font-monospace py-0 px-1" style="font-size: 0.58rem;">—</span>
+                                        </div>
+                                        <div id="metricEqualityVal" class="fw-bold font-monospace text-dark" style="font-size: 0.92rem;">—</div>
+                                        <div class="text-muted text-truncate" id="metricDiffVal" style="font-size: 0.6rem;">Piksel Berbeda: —</div>
                                     </div>
                                 </div>
                             </div>
@@ -1313,6 +1349,13 @@
                 psnrBadge.textContent = mseDec === 0 ? 'Lossless' : 'Lossy';
                 psnrBadge.className = mseDec === 0 ? 'badge bg-success font-monospace py-0 px-1' : 'badge bg-warning font-monospace py-0 px-1';
             }
+            const mseDecVal = document.getElementById('metricMSEDecVal');
+            if (mseDecVal) mseDecVal.textContent = mseDec.toFixed(4);
+            const mseDecBadge = document.getElementById('metricMSEDecBadge');
+            if (mseDecBadge) {
+                mseDecBadge.textContent = mseDec === 0 ? 'Lossless' : 'Ada Galat';
+                mseDecBadge.className = mseDec === 0 ? 'badge bg-success font-monospace py-0 px-1' : 'badge bg-danger font-monospace py-0 px-1';
+            }
 
             // 5. Pixel Equality (Original vs Decrypted)
             const totalPixels = width * height;
@@ -1451,6 +1494,14 @@
             if (psnrBadge) {
                 psnrBadge.textContent = 'dB';
                 psnrBadge.className = 'badge bg-light text-secondary border font-monospace py-0 px-1';
+            }
+
+            const mseDecVal = document.getElementById('metricMSEDecVal');
+            if (mseDecVal) mseDecVal.textContent = '—';
+            const mseDecBadge = document.getElementById('metricMSEDecBadge');
+            if (mseDecBadge) {
+                mseDecBadge.textContent = 'Galat';
+                mseDecBadge.className = 'badge bg-light text-secondary border font-monospace py-0 px-1';
             }
 
             document.getElementById('metricMSEVal').textContent = '—';
